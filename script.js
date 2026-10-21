@@ -237,6 +237,7 @@ function askQuestion(typeLabel, onResult){
 
 // ---------- Game init ----------
 function startGame(){
+  const rs=$('rotateScreen'); if(rs) rs.classList.add('hidden');
   const mazeStr=MAZES[map];
   maze=mazeStr.map(r=>r.split(''));
   rows=maze.length; cols=maze[0].length;
@@ -495,6 +496,7 @@ canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 // ---------- Wiring ----------
 bindTap($('introNext'),()=>{state='level';show('levelScreen');});
 bindTap($('charStart'),()=>{ if(!char){char=CHARS[0].id;} state='play'; startGame(); });
+bindTap($('continuePortrait'),()=>{ $('rotateScreen').classList.add('hidden'); });
 bindTap($('resumeBtn'),()=>{paused=false;hideAll();});
 bindTap($('quitBtn'),quitToMenu);
 bindTap($('quitGameBtn'),()=>{ if(confirm('Quit game?')) quitToMenu(); });
@@ -509,6 +511,24 @@ function quitToMenu(){
   show('introScreen');
 }
 
+// ---- Orientation handling ----
+function checkOrientation(){
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isSmall = window.innerWidth < 700;
+  const rs = $('rotateScreen');
+  if(!rs) return;
+  if(isPortrait && isSmall){
+    // only nag on intro/level/map/char screens, not during play
+    if(state==='intro' || state==='level' || state==='map' || state==='char'){
+      rs.classList.remove('hidden');
+    }
+  } else {
+    rs.classList.add('hidden');
+  }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 300); });
+
 // init grids
 renderLevelGrid(); renderMapGrid(); renderCharGrid();
 
@@ -519,3 +539,4 @@ document.addEventListener('touchstart', (e)=>{ if(state==='intro'){ state='level
 resize();
 show('introScreen');
 state='intro';
+checkOrientation();

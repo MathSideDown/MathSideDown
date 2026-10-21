@@ -49,6 +49,18 @@ body{display:flex;flex-direction:column;}
 
 /* ---- Bottom controls ---- */
 .bottom{background:var(--panel);border-top:1px solid #2a1f3a;padding:8px 12px;z-index:100;flex-shrink:0;position:relative;}
+/* ---- Landscape optimization ---- */
+@media (orientation: landscape) {
+  .topbar{padding:4px 10px;}
+  .brand{font-size:18px;}
+  .hud .item{min-width:34px;}
+  .hud .v{font-size:15px;}
+  .hud .l{font-size:8px;}
+  .bottom{padding:4px 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .dpad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:4px;margin:0;}
+  .bottom-row{margin:0;}
+  .dpad button{font-size:18px;}
+}
 .dpad{display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(3,60px);gap:6px;justify-content:center;margin:0 auto;}
 .dpad button{background:var(--panel2);border:1px solid #2a1f3a;border-radius:10px;color:var(--text);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-user-select:none;user-select:none;}
 .dpad button:active{background:var(--red);color:#fff;}
