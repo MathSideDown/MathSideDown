@@ -24,7 +24,6 @@ const CHARS = [
   {id:'lucas',name:'Lucas',emoji:' Bandana',color:'#b3001b'},
   {id:'will',name:'Will',emoji:' Art',color:'#8a7fa0'}
 ];
-
 const THEMES={
   hawkins:{wall:'#4a4863',floor:'#18100f',acc:'#ff2a3d'},
   upside:{wall:'#3d4a44',floor:'#0f1512',acc:'#ff3b50'},
@@ -33,12 +32,6 @@ const THEMES={
   creel:{wall:'#5a403f',floor:'#120b0b',acc:'#ff3b50'}
 };
 MAPS.forEach(m=>Object.assign(m.theme,THEMES[m.id]));
-// ---------- Difficulty: maze size + Demogorgon speed & IQ ----------
-// stepMs = Demogorgon time per step (lower = faster)   iq 1-4 = how smart it hunts
-//  1 Clumsy  : wanders, only notices you up close, often stumbles
-//  2 Curious : tracks you by path, remembers where it last saw you
-//  3 Cunning : long sight, predicts where you are heading, hears wrong answers
-//  4 Ruthless: knows where you are, hunters / ambushers / exit-blockers, lunges
 const DIFF = {
   preschool :{w:35,h:21,hearts:4,mons:1,stepMs:1250,iq:1,speed:1,sight:5,  acc:.65,grace:6000,stun:5000,stepSec:.85,qSec:7,  bonus:6,label:'Nursery'},
   elementary:{w:45,h:27,hearts:3,mons:2,stepMs:900, iq:2,speed:2,sight:9,  acc:.85,grace:4500,stun:4000,stepSec:.65,qSec:6,  bonus:5,label:'Elementary'},
@@ -46,13 +39,12 @@ const DIFF = {
   college   :{w:71,h:41,hearts:3,mons:4,stepMs:460, iq:4,speed:4,sight:999,acc:1,  grace:2500,stun:2000,stepSec:.45,qSec:4.5,bonus:3,label:'College'}
 };
 const DIRS4=[[-1,0],[1,0],[0,-1],[0,1]];
-// Each map has its own maze "personality": straight = long runs, braid = loops, rooms = open halls
 const STYLE = {
-  hawkins  :{straight:.75,braid:.30,rooms:3},  // long cold corridors, a few labs
-  upside   :{straight:.15,braid:.10,rooms:2},  // twisty, dead-end heavy woods
-  starcourt:{straight:.50,braid:.45,rooms:8},  // wide open halls and shops
-  russian  :{straight:.92,braid:.20,rooms:3},  // long straight steel tunnels
-  creel    :{straight:.35,braid:.25,rooms:6}   // lots of small rooms
+  hawkins  :{straight:.75,braid:.30,rooms:3},
+  upside   :{straight:.15,braid:.10,rooms:2},
+  starcourt:{straight:.50,braid:.45,rooms:8},
+  russian  :{straight:.92,braid:.20,rooms:3},
+  creel    :{straight:.35,braid:.25,rooms:6}
 };
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function bfsGrid(g,R,C,sr,sc){
@@ -66,13 +58,11 @@ function bfsGrid(g,R,C,sr,sc){
   }
   return d;
 }
-// Chars: # wall, space floor, S start, E exit, M math rift, Y mystery star, G Demogorgon spawn
 function genMaze(mapId,W,H,nMons,rng){
   const st=STYLE[mapId]||STYLE.hawkins;
   const g=Array.from({length:H},()=>Array(W).fill('#'));
   const rint=(a,b)=>a+Math.floor(rng()*(b-a+1));
   const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
-  // 1) perfect maze: iterative DFS, biased to keep going straight
   const D2=[[-2,0],[2,0],[0,-2],[0,2]]; g[1][1]=' ';
   const stack=[[1,1,-1]];
   while(stack.length){
@@ -82,20 +72,17 @@ function genMaze(mapId,W,H,nMons,rng){
     const d=(opts.includes(ld)&&rng()<st.straight)?ld:opts[Math.floor(rng()*opts.length)];
     const [dr,dc]=D2[d]; g[r+dr/2][c+dc/2]=' '; g[r+dr][c+dc]=' '; stack.push([r+dr,c+dc,d]);
   }
-  // 2) braid: knock through some dead ends so there are loops to run around
   for(let r=1;r<H-1;r+=2)for(let c=1;c<W-1;c+=2){
     if(DIRS4.filter(([a,b])=>g[r+a][c+b]===' ').length!==1||rng()>=st.braid)continue;
     const w=DIRS4.filter(([a,b])=>{const x=r+a*2,y=c+b*2;return x>0&&y>0&&x<H-1&&y<W-1&&g[r+a][c+b]==='#';});
     if(w.length){const [a,b]=w[Math.floor(rng()*w.length)];g[r+a][c+b]=' ';}
   }
-  // 3) rooms
   const nRooms=Math.round(st.rooms*W*H/1100);
   for(let i=0;i<nRooms;i++){
     const rh=rint(1,2)*2+1, rw=rint(1,3)*2+1;
     const r0=rint(0,(H-2-rh)>>1)*2+1, c0=rint(0,(W-2-rw)>>1)*2+1;
     for(let r=r0;r<r0+rh&&r<H-1;r++)for(let c=c0;c<c0+rw&&c<W-1;c++)g[r][c]=' ';
   }
-  // 4) stations, spawns, start, exit
   const key=(r,c)=>r*W+c;
   const dS=bfsGrid(g,H,W,1,1), dE=bfsGrid(g,H,W,H-2,W-2), pathLen=dS[key(H-2,W-2)];
   const free=[]; for(let r=1;r<H-1;r++)for(let c=1;c<W-1;c++)if(g[r][c]===' ')free.push([r,c]);
@@ -103,18 +90,19 @@ function genMaze(mapId,W,H,nMons,rng){
   const spot=(r,c,gap)=>g[r][c]===' '&&dS[key(r,c)]>=5&&dE[key(r,c)]>=3&&taken.every(([a,b])=>Math.abs(a-r)+Math.abs(b-c)>=gap);
   const put=(r,c,ch)=>{g[r][c]=ch;taken.push([r,c]);};
   const path=[]; {let r=1,c=1; while(dE[key(r,c)]>0){path.push([r,c]);for(const [a,b] of DIRS4){if(g[r+a][c+b]!=='#'&&dE[key(r+a,c+b)]===dE[key(r,c)]-1){r+=a;c+=b;break;}}}}
-  const nMath=Math.max(6,Math.min(40,Math.round(free.length/45)));
-  const onPath=Math.round(nMath*.6); let placed=0;
-  for(let i=1;i<=onPath;i++){                       // rifts along the main route
-    const base=Math.round(path.length*i/(onPath+1));
-    for(const o of [0,1,-1,2,-2,3,-3]){const p=path[base+o]; if(p&&spot(p[0],p[1],4)){put(p[0],p[1],'M');placed++;break;}}
-  }
+  const nMath=Math.max(6,Math.min(40,Math.round(free.length/40)));
+  // scatter rifts across the whole maze, not just along one route:
+  // only ~25% sit on the main path, the rest are spread out over open floor
+  const onPath=Math.round(nMath*.25); let placed=0;
+  for(let i=1;i<=onPath;i++){const base=Math.round(path.length*i/(onPath+1));for(const o of [0,1,-1,2,-2,3,-3,4,-4]){const p=path[base+o]; if(p&&spot(p[0],p[1],4)){put(p[0],p[1],'M');placed++;break;}}}
   const cand=shuf(free.slice());
-  for(const [r,c] of cand){if(placed>=nMath)break; if(spot(r,c,5)){put(r,c,'M');placed++;}}  // rest hidden off-route
-  const nMys=Math.max(2,Math.round(nMath/4)); let ys=0;                                         // mystery stars: reward for exploring dead ends
-  const dead=shuf(free.filter(([r,c])=>DIRS4.filter(([a,b])=>g[r+a][c+b]!=='#').length===1&&dS[key(r,c)]>=12));
-  for(const [r,c] of dead){if(ys>=nMys)break; if(spot(r,c,8)){put(r,c,'Y');ys++;}}
-  for(const [r,c] of cand){if(ys>=nMys)break; if(dS[key(r,c)]>=12&&spot(r,c,8)){put(r,c,'Y');ys++;}}
+  for(const [r,c] of cand){if(placed>=nMath)break; if(spot(r,c,4)){put(r,c,'M');placed++;}}
+  const nMys=Math.max(3,Math.round(nMath/3)); let ys=0;
+  const dead=shuf(free.filter(([r,c])=>DIRS4.filter(([a,b])=>g[r+a][c+b]!=='#').length===1&&dS[key(r,c)]>=8));
+  for(const [r,c] of dead){if(ys>=nMys)break; if(spot(r,c,6)){put(r,c,'Y');ys++;}}
+  for(const [r,c] of cand){if(ys>=nMys)break; if(dS[key(r,c)]>=8&&spot(r,c,6)){put(r,c,'Y');ys++;}}
+  // extra scatter across the whole maze so stars aren't clustered
+  for(const [r,c] of shuf(free.slice())){if(ys>=nMys)break; if(spot(r,c,5)){put(r,c,'Y');ys++;}}
   const far=shuf(free.filter(([r,c])=>g[r][c]===' '&&dS[key(r,c)]>=pathLen*.4&&dE[key(r,c)]>=3)), ms=[];
   for(const gap of [10,6,3,1])for(const [r,c] of far){
     if(ms.length>=nMons)break;
@@ -123,6 +111,14 @@ function genMaze(mapId,W,H,nMons,rng){
   g[1][1]='S'; g[H-2][W-2]='E';
   return {rows:g.map(r=>r.join('')),pathLen,nMath:placed};
 }
+
+// ---------- Safe storage ----------
+const _mem={};
+const store={
+  get(k){try{return localStorage.getItem(k);}catch(e){return k in _mem?_mem[k]:null;}},
+  set(k,v){try{localStorage.setItem(k,v);}catch(e){_mem[k]=String(v);}},
+  remove(k){try{localStorage.removeItem(k);}catch(e){delete _mem[k];}}
+};
 
 // ---------- State ----------
 let state = 'intro';
@@ -143,9 +139,9 @@ let qResolve=null;
 let spawns=[], exitPos={r:0,c:0}, distExit=null;
 let noise=null, invulnUntil=0, lastAlert=0, lastMT=0, rendering=false;
 let pdir={r:0,c:1};
-const pv={r:0,c:0};                                   // smoothed player position for drawing
-const view={ts:16,offX:0,offY:0,cx:0,cy:0,vc:1,vr:1,snap:true};   // camera
-let highScore = +localStorage.getItem('msd_best')||0;
+const pv={r:0,c:0};
+const view={ts:16,offX:0,offY:0,cx:0,cy:0,vc:1,vr:1,snap:true};
+let highScore = +store.get('msd_best')||0;
 
 // ---------- DOM helpers ----------
 const $ = id => document.getElementById(id);
@@ -198,7 +194,6 @@ function renderCharGrid(){
     bindTap(c,()=>{char=C.id; setupPlayerCard(); document.querySelectorAll('#charGrid .card').forEach(x=>x.classList.remove('sel')); c.classList.add('sel');});
     g.appendChild(c);
   });
-  // default select first
   const first=g.querySelector('.card'); if(first){first.classList.add('sel'); char=CHARS[0].id;}
 }
 
@@ -269,14 +264,14 @@ const pf=p=>p.map(t=>(t/10).toFixed(1)).join(', ');
 const distStats=p=>{const m=p.reduce((s,t,x)=>s+x*t,0)/10, e2=p.reduce((s,t,x)=>s+x*x*t,0)/10; return {m,e2,v:e2-m*m};};
 function qBayes(){const pA=pick([50,60,70]),pB=100-pA,a=pick([5,10,15]),b=pick([20,25,30]),w=Math.random()<.5?'A':'B';
   const num=w==='A'?pA*a/100:pB*b/100, den=pA*a/100+pB*b/100;
-  return mcNum('Bayes','Suppliers A/B have priors '+pA+'%/'+pB+'% and poor-quality rates '+a+'%/'+b+'%. If a random item is poor quality, P(from '+w+' | poor) = ?',num/den*100,[num/den*100+5,num/den*100-5, (w==='A'?pA:pB), a],2);}
+  return mcNum('Bayes','Suppliers A/B have priors '+pA+'%/'+pB+'% and poor-quality rates '+a+'%/'+b+'%. If a random item is poor quality, P(from '+w+' | poor) = ?',num/den*100,[num/den*100+5,num/den*100-5, (w==='A'?pA:pB), a],2,'%');}
 function qBayesTot(){const pA=pick([50,60,70]),pB=100-pA,gA=pick([85,90,95]),gB=pick([70,75,80,85]),ans=(pA*gA+pB*gB)/10000;
-  return mcNum('Bayes','P(good quality) = P(A)P(good|A)+P(B)P(good|B) with priors '+pA+'%/'+pB+'% and good rates '+gA+'%/'+gB+'% = ?',ans*100,[ans*100+5,ans*100-5,pA*gA/100+pB*gB/100-0.1],2);}
+  return mcNum('Bayes','P(good quality) = P(A)P(good|A)+P(B)P(good|B) with priors '+pA+'%/'+pB+'% and good rates '+gA+'%/'+gB+'% = ?',ans*100,[ans*100+5,ans*100-5,pA*gA/100+pB*gB/100-0.1],2,'%');}
 function qMean(){const p=tenths(), m=p.reduce((s,t,x)=>s+x*t,0)/10;
   return mcNum('Distribution','For discrete values x=0,1,2,3 with P(x)='+pf(p)+', mean u = ?',m,[m+0.2,m-0.2,m*2,0.5],2);}
 function qVar(){const p=tenths(), st=distStats(p);
   return mcNum('Distribution','For x=0,1,2,3 with P(x)='+pf(p)+', variance sigma^2 = ?',st.v,[st.v+0.3,st.v-0.2,st.m,st.e2],2);}
-function qMissing(){const p=[pick([2,3,4]),pick([3,4,5]),pick([1,2,3]),0], tot=p.slice(0,3).reduce((a,b)=>a+b,0)/10, miss=1-tot;
+function qMissing(){const p=[pick([2,3,4]),pick([2,3]),pick([1,2]),0], tot=p.slice(0,3).reduce((a,b)=>a+b,0)/10, miss=1-tot;
   return mcNum('Probability','Probabilities of three outcomes are '+(p[0]/10).toFixed(1)+', '+(p[1]/10).toFixed(1)+', '+(p[2]/10).toFixed(1)+'. The fourth must be ?',miss,[miss+0.1,miss-0.1,0.5,tot],2);}
 function qZ(){const x=pick([14,15,16,49,50]), mu=pick([10,40]), sd=pick([2,3,4,5]);
   return mcNum('Normal','Z = (x-u)/sigma with x='+x+', u='+mu+', sigma='+sd+' gives Z = ?',(x-mu)/sd,[(x-mu)/sd+0.5,(x-mu)/sd-0.5,(x+mu)/sd],2);}
@@ -294,8 +289,8 @@ function qCutoff(){const z=pick([-2.33,-1.96,-1.645,1.645,1.96,2.33]);
   const idx=[-2.33,-1.96,-1.645,1.645,1.96,2.33].indexOf(z);
   const areas=['0.01','0.025','0.05','0.95','0.975','0.99'];
   return mc('Normal','Common Z cutoff '+z+' corresponds to a one-tail area of about...',areas[idx],areas.filter((_,i)=>i!==idx));}
-function qTable(){const t=pick(['Z','T','Chi-square']);
-  return mc('Normal','Which table is used for the '+t+' distribution? (concept check)','Standard normal table',['Binomial table','Poisson table','F-table']);}
+function qTable(){
+  return mc('Normal','Which table is used to find areas under the standard normal (Z) curve?','Standard normal table',['Binomial table','Poisson table','F-table']);}
 const STAT_FACTS=[
   ()=>mc('Bayes','Bayes Theorem updates a probability using...','New evidence (likelihood)',['Prior only','Random guessing','The mean']),
   ()=>mc('Bayes','In Bayes, P(Ei) is called the...','Prior probability',['Posterior','Likelihood','Marginal']),
@@ -355,29 +350,52 @@ function genQuestion(){
   return {q,ans,opts:arr};
 }
 
+let qOpen=false, qToken=0;
+function basicHint(q){
+  if(q.includes('×'))return 'Multiplication is repeated addition. Think of your times tables.';
+  if(q.includes('÷'))return 'Division is the opposite of multiplying: what number times the divisor gives the total?';
+  if(q.includes(' - '))return 'Subtracting: count backwards from the first number.';
+  if(q.includes(' + '))return 'Adding: start from the bigger number and count up.';
+  return 'Take your time and check your work.';
+}
 function askQuestion(typeLabel, onResult){
-  const Q=genQuestion();
+  const Q=genQuestion(), tok=++qToken, qs=String(Q.q);
+  qOpen=true;
   $('qtype').textContent=typeLabel||'MATH CHALLENGE';
-  $('qtext').textContent=Q.q;
+  const qt=$('qtext'); qt.textContent=qs;
+  qt.className='qtext'+(qs.length<=9?'':qs.length<=16?' md':qs.length<=44?' lg':' xl');
   const hb=$('qhintBtn'), ht=$('qhint');
-  if(hb&&ht){ hb.classList.remove('hidden'); hb.disabled=false; hb.textContent='? Hint'; ht.classList.add('hidden'); ht.textContent=Q.hint||'';
-    bindTap(hb,()=>{ ht.classList.remove('hidden'); hb.disabled=true; hb.textContent='Hint used'; });
-  }
-  const o=$('qopts'); o.innerHTML='';
+  ht.textContent=Q.hint||basicHint(qs); ht.classList.add('hidden');
+  hb.disabled=false; hb.textContent='? Hint'; hb.classList.remove('hidden');
+  const maxLen=Math.max(...Q.opts.map(v=>String(v).length));
+  const o=$('qopts'); o.innerHTML=''; o.dataset.locked='';
+  o.className='qopts'+(maxLen>10?' one':'');
+  const cls=maxLen>10?(maxLen>22?'tx2':'tx'):maxLen>5?'tx':'';
+  const btns=[];
   Q.opts.forEach(v=>{
-    const b=document.createElement('button'); b.className='qopt'; b.textContent=v;
+    const b=document.createElement('button'); b.type='button';
+    b.className='qopt'+(cls?' '+cls:''); b.textContent=v; b.dataset.val=String(v);
     bindTap(b,()=>{
-      document.querySelectorAll('.qopt').forEach(x=>x.style.pointerEvents='none');
-      if(v===Q.ans){b.classList.add('correct'); onResult(true,v);}
-      else{b.classList.add('wrong'); document.querySelectorAll('.qopt').forEach(x=>{if(+x.textContent===Q.ans)x.classList.add('correct');}); onResult(false,v);}
+      if(o.dataset.locked==='1')return; o.dataset.locked='1';
+      const ok=String(v)===String(Q.ans);
+      btns.forEach(x=>{x.style.pointerEvents='none'; if(x.dataset.val===String(Q.ans))x.classList.add('correct');});
+      if(!ok)b.classList.add('wrong');
+      // leave the green/red feedback on screen for a moment before closing
+      setTimeout(()=>{
+        if(tok!==qToken)return;
+        qOpen=false;
+        if(state!=='play')return;
+        onResult(ok,v);
+      }, ok?500:1300);
     });
-    o.appendChild(b);
+    btns.push(b); o.appendChild(b);
   });
   $('qmodal').classList.remove('hidden');
 }
 
 // ---------- Game init ----------
 function startGame(){
+  qToken++; qOpen=false;
   const rs=$('rotateScreen'); if(rs) rs.classList.add('hidden');
   const cfg=DIFF[level]||DIFF.elementary;
   const gen=genMaze(map,cfg.w,cfg.h,cfg.mons,mulberry32((Math.random()*4294967296)>>>0));
@@ -397,7 +415,7 @@ function startGame(){
   distExit=bfsGrid(maze,rows,cols,exitPos.r,exitPos.c);
   hearts=cfg.hearts; score=0; correctCount=0; wrongCount=0; riftsDone=0;
   riftsTotal=maze.flat().filter(t=>t==='M').length; setupPlayerCard(); setThreatHUD(cfg);
-  timeLeft=Math.round(gen.pathLen*cfg.stepSec+0.5*riftsTotal*cfg.qSec+25);   // scales with maze size
+  timeLeft=Math.round(gen.pathLen*cfg.stepSec+0.5*riftsTotal*cfg.qSec+25);
   maxHearts=5;
   paused=false;
   view.snap=true;
@@ -435,17 +453,17 @@ function tileOpen(r,c){return r>=0&&c>=0&&r<rows&&c<cols&&maze[r][c]!=='#';}
 function openNbrs(r,c){return DIRS4.filter(([a,b])=>tileOpen(r+a,c+b)).map(([a,b])=>({r:r+a,c:c+b,dr:a,dc:b}));}
 function stepTo(m,n){m.pr=m.r;m.pc=m.c;m.dr=n.dr;m.dc=n.dc;m.r=n.r;m.c=n.c;}
 function wanderPick(m,ns){
-  const fwd=ns.filter(n=>!(n.r===m.pr&&n.c===m.pc)), pool=fwd.length?fwd:ns;   // don't turn back unless dead end
+  const fwd=ns.filter(n=>!(n.r===m.pr&&n.c===m.pc)), pool=fwd.length?fwd:ns;
   const straight=pool.find(n=>n.dr===m.dr&&n.dc===m.dc);
   return straight&&Math.random()<.6?straight:pool[Math.floor(Math.random()*pool.length)];
 }
-function descend(m,D,acc){            // one step down a BFS distance field; "acc" = chance it doesn't stumble
+function descend(m,D,acc){
   const ns=openNbrs(m.r,m.c); if(!ns.length)return;
   let best=null,bd=1e9; ns.forEach(n=>{const d=D[n.r*cols+n.c]; if(d>=0&&d<bd){bd=d;best=n;}});
   if(!best||Math.random()>acc)best=wanderPick(m,ns);
   stepTo(m,best);
 }
-function aheadOf(P,k){                // where the player is probably heading: follow the corridor k tiles
+function aheadOf(P,k){
   let r=P.r,c=P.c,dr=pdir.r,dc=pdir.c;
   for(let i=0;i<k;i++){
     const ns=DIRS4.filter(([a,b])=>tileOpen(r+a,c+b)&&!(a===-dr&&b===-dc)); if(!ns.length)break;
@@ -453,7 +471,7 @@ function aheadOf(P,k){                // where the player is probably heading: f
   }
   return {r,c};
 }
-function cutOff(P,k){                 // a tile k steps ahead of the player on their way to the exit
+function cutOff(P,k){
   let r=P.r,c=P.c;
   for(let i=0;i<k;i++){
     let best=null,bd=distExit[r*cols+c];
@@ -465,19 +483,19 @@ function cutOff(P,k){                 // a tile k steps ahead of the player on t
 function thinkMonster(m,idx,cfg,pd){
   const P=player, now=performance.now(), dm=pd[m.r*cols+m.c], seen=dm>=0&&dm<=cfg.sight;
   if(seen)m.mem={r:P.r,c:P.c};
-  else if(cfg.iq>=3&&noise&&now<noise.until&&(cfg.iq>=4||Math.abs(noise.r-m.r)+Math.abs(noise.c-m.c)<30))m.mem={r:noise.r,c:noise.c};   // heard a wrong answer
+  else if(cfg.iq>=3&&noise&&now<noise.until&&(cfg.iq>=4||Math.abs(noise.r-m.r)+Math.abs(noise.c-m.c)<30))m.mem={r:noise.r,c:noise.c};
   m.mode=seen?'chase':m.mem?'hunt':'wander';
   const ns=openNbrs(m.r,m.c); if(!ns.length)return;
-  if(cfg.iq===1){ if(seen)descend(m,pd,cfg.acc); else stepTo(m,wanderPick(m,ns)); return; }   // Clumsy
+  if(cfg.iq===1){ if(seen)descend(m,pd,cfg.acc); else stepTo(m,wanderPick(m,ns)); return; }
   if(seen){
-    const role=cfg.iq>=4?idx%3:cfg.iq===3?idx%2:0;     // 0 hunter, 1 ambusher, 2 exit-blocker
+    const role=cfg.iq>=4?idx%3:cfg.iq===3?idx%2:0;
     let D=pd;
     if(role===1&&dm>6){const t=aheadOf(P,cfg.iq>=4?5:3);D=bfsGrid(maze,rows,cols,t.r,t.c);}
     else if(role===2&&dm>8){const t=cutOff(P,12);D=bfsGrid(maze,rows,cols,t.r,t.c);}
     if(D!==pd&&D[m.r*cols+m.c]<=1)D=pd;
     descend(m,D,cfg.acc); return;
   }
-  if(m.mem){                                              // lost sight: go to where it last knew you were
+  if(m.mem){
     if(m.r===m.mem.r&&m.c===m.mem.c){m.mem=null;stepTo(m,wanderPick(m,ns));return;}
     descend(m,bfsGrid(maze,rows,cols,m.mem.r,m.mem.c),cfg.acc); return;
   }
@@ -489,7 +507,7 @@ function checkCatch(m,cfg){
   invulnUntil=now+1500;
   damagePlayer('Caught by Demogorgon!');
   const far=spawns.slice().sort((a,b)=>(Math.abs(b.r-player.r)+Math.abs(b.c-player.c))-(Math.abs(a.r-player.r)+Math.abs(a.c-player.c)))[0]||{r:m.r,c:m.c};
-  m.r=m.pr=far.r; m.c=m.pc=far.c; m.vr=m.r; m.vc=m.c; m.mem=null;     // retreats to the farthest lair, stunned
+  m.r=m.pr=far.r; m.c=m.pc=far.c; m.vr=m.r; m.vc=m.c; m.mem=null;
   m.freezeUntil=now+cfg.stun; m.next=m.freezeUntil;
   return true;
 }
@@ -503,7 +521,7 @@ function tickMonsters(){
       if(!pd)pd=bfsGrid(maze,rows,cols,player.r,player.c);
       thinkMonster(m,i,cfg,pd); m.moves++;
       m.next=now+cfg.stepMs*(0.9+Math.random()*0.2);
-      if(!checkCatch(m,cfg)&&cfg.iq>=4&&m.mode==='chase'&&m.moves%5===0){thinkMonster(m,i,cfg,pd);checkCatch(m,cfg);}   // Ruthless: lunge
+      if(!checkCatch(m,cfg)&&cfg.iq>=4&&m.mode==='chase'&&m.moves%5===0){thinkMonster(m,i,cfg,pd);checkCatch(m,cfg);}
     }
     if(m.mode==='chase'&&m.prevMode!=='chase'&&now-lastAlert>8000){lastAlert=now;toast('The Demogorgon senses you!');}
     m.prevMode=m.mode;
@@ -524,7 +542,7 @@ function damagePlayer(reason){
 }
 
 function tileSize(){return view.ts;}
-function tileScreen(r,c){            // client-space position of a tile (camera aware)
+function tileScreen(r,c){
   const rect=canvas.getBoundingClientRect();
   return {x:rect.left+view.offX+(c-view.cx)*view.ts, y:rect.top+view.offY+(r-view.cy)*view.ts, ts:view.ts};
 }
@@ -536,7 +554,7 @@ function movePlayer(dr,dc){
   if(maze[nr][nc]==='#')return;
   player.r=nr; player.c=nc; pdir={r:dr,c:dc};
   const cfg=DIFF[level]||DIFF.elementary;
-  monsters.forEach(m=>checkCatch(m,cfg));             // walking into a Demogorgon counts too
+  monsters.forEach(m=>checkCatch(m,cfg));
   if(state!=='play')return;
   const tile=maze[nr][nc];
   if(tile==='M'){handleStation('math',nr,nc);}
@@ -560,14 +578,13 @@ function handleStation(kind,r,c){
       maze[r][c]=' ';
       const p=tileScreen(r,c), cfg=DIFF[level]||DIFF.elementary;
       floatText('+'+(kind==='mystery'?80:30),'#39ff14',p.x+p.ts/2-12,p.y);
-      if(kind==='math')timeLeft+=cfg.bonus;                      // bigger maze, so correct rifts buy time
+      if(kind==='math')timeLeft+=cfg.bonus;
       toast(kind==='mystery'?'Mystery solved! +80':'Correct! Door opened +'+cfg.bonus+'s');
       updateHUD();
     } else {
       wrongCount++;
-      noise={r:player.r,c:player.c,until:performance.now()+6000};   // smart Demogorgons hear this
+      noise={r:player.r,c:player.c,until:performance.now()+6000};
       damagePlayer('Wrong answer');
-      // regenerate a new question on retry by keeping station; but avoid infinite loop: allow move away
     }
   });
 }
@@ -579,7 +596,7 @@ function gameOver(win,reason){
   const timeTaken=Math.round((Date.now()-gameStart)/1000);
   let finalScore=score + (win?200:0) + hearts*20 + Math.max(0,Math.round(timeLeft));
   if(win){ finalScore+=100; }
-  if(finalScore>highScore){highScore=finalScore;localStorage.setItem('msd_best',highScore);}
+  if(finalScore>highScore){highScore=finalScore;store.set('msd_best',highScore);}
   addScore(finalScore);
   $('resultTitle').textContent=win?'VICTORY':'GAME OVER';
   $('resultSub').textContent=reason;
@@ -599,7 +616,7 @@ function gameOver(win,reason){
   show('resultScreen');
 }
 
-// ---------- Rendering (pixel art: every tile is drawn at 16x16, then scaled up un-smoothed) ----------
+// ---------- Rendering (pixel art) ----------
 const T=16;
 const SPR={
   eleven:{hair:'#7a4a2a',skin:'#f0c8a0'}, max:{hair:'#d9531e',skin:'#f0c8a0'},
@@ -636,7 +653,7 @@ function wallTile(g,x,y,th,h,above,below){
   g.fillStyle='rgba(0,0,0,.38)';
   g.fillRect(x,y+7,T,1);g.fillRect(x+(h%2?5:10),y,1,7);g.fillRect(x+(h%2?10:4),y+8,1,8);
   g.fillStyle='rgba(0,0,0,.55)';g.fillRect(x+15,y,1,T);g.fillRect(x,y+15,T,1);
-  g.fillStyle='rgba(255,255,255,.16)';g.fillRect(x+1+h%12,y+2+(h>>4)%4,1,1);g.fillRect(x+2+(h>>3)%11,y+9+(h>>6)%5,1,1);
+  g.fillStyle='rgba(255,220,200,.16)';g.fillRect(x+1+h%12,y+2+(h>>4)%4,1,1);g.fillRect(x+2+(h>>3)%11,y+9+(h>>6)%5,1,1);
 }
 function vinePx(g,x,y,h){
   const side=(h>>>3)%4, v=h%2?'#d4142e':'#8a0a1c';
@@ -675,7 +692,7 @@ function glowSq(g,cx,cy,r,rgb,a){for(let i=0;i<3;i++){const q=r*(1-i*.3);g.fillS
 const buf=document.createElement('canvas'), bg=buf.getContext('2d');
 const staticBuf=document.createElement('canvas'), sg=staticBuf.getContext('2d');
 let staticFor=null, staticTh=null;
-function buildStatic(mz,R,C,th){     // walls / floors / props never change, so draw them once per maze
+function buildStatic(mz,R,C,th){
   staticBuf.width=C*T; staticBuf.height=R*T;
   const at=(rr,c)=>(rr<0||c<0||rr>=R||c>=C)?'#':mz[rr][c];
   for(let rr=0;rr<R;rr++)for(let c=0;c<C;c++){
@@ -687,10 +704,10 @@ function buildStatic(mz,R,C,th){     // walls / floors / props never change, so 
   if(at(1,3)!=='#'){const lx=3*T+8,ly=T+8;glowSq(sg,lx,ly,28,'255,190,110',.1);sg.fillStyle='#2a2430';sg.fillRect(lx-1,ly-2,2,10);sg.fillStyle='#ffd48a';sg.fillRect(lx-3,ly-5,6,3);}
 }
 const MON_PALS=[
-  {p:'#9a5aa8',d:'#3a1a48',m:'#ffd0ff'},   // Nursery: pale, clumsy
-  {p:'#8a0a1e',d:'#2a0510',m:'#ff5a6a'},   // Elementary
-  {p:'#b3001b',d:'#1a0308',m:'#ffb02e'},   // High School
-  {p:'#ff2a3d',d:'#10010a',m:'#ffffff'}    // College: glowing red
+  {p:'#9a5aa8',d:'#3a1a48',m:'#ffd0ff'},
+  {p:'#8a0a1e',d:'#2a0510',m:'#ff5a6a'},
+  {p:'#b3001b',d:'#1a0308',m:'#ffb02e'},
+  {p:'#ff2a3d',d:'#10010a',m:'#ffffff'}
 ];
 function render(){
   const r=canvas.getBoundingClientRect(), g=ctx;
@@ -700,7 +717,6 @@ function render(){
   const mz=playing?maze:PREVIEW, R=mz.length, C=mz[0].length;
   const th=(MAPS.find(x=>x.id===(playing?map:'hawkins'))||MAPS[0]).theme, t=performance.now()/1000, fr=Math.floor(t*5);
   if(staticFor!==mz||staticTh!==th){buildStatic(mz,R,C,th);staticFor=mz;staticTh=th;}
-  // viewport: whole maze on the menu, a camera window that follows the player in game
   let ts,vc,vr;
   if(playing){
     const t0=Math.max(22,Math.min(44,Math.floor(Math.min(r.width/15,r.height/12))));
@@ -718,7 +734,6 @@ function render(){
   } else {view.cx=0;view.cy=0;view.snap=true;}
   const offX=(r.width-vc*ts)/2, offY=(r.height-vr*ts)/2;
   view.ts=ts;view.offX=offX;view.offY=offY;view.vc=vc;view.vr=vr;
-  // compose one 16px-per-tile frame: cached static layer + animated things
   if(buf.width!==C*T||buf.height!==R*T){buf.width=C*T;buf.height=R*T;}
   bg.drawImage(staticBuf,0,0);
   for(let rr=0;rr<R;rr++)for(let c=0;c<C;c++){
@@ -748,7 +763,7 @@ function render(){
 }
 function drawArt(){
   const g=$('artCanvas').getContext('2d'),P=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h);};
-  const sky=['#2e0008','#46000e','#62091a','#7e1224','#9a1a2c','#7e1224'];
+  const sky=['#2e0008','#460008','#62091a','#7e1224','#9a1a2c','#7e1224'];
   sky.forEach((c,i)=>P(0,i*6,96,6,c));
   for(let i=1;i<6;i++)for(let x=i%2;x<96;x+=2)P(x,i*6,1,1,sky[i-1]);
   P(0,32,96,6,'#2a030a');for(let x=0;x<96;x+=4)P(x,30+((x*7)%3),3,3,'#2a030a');
@@ -779,12 +794,12 @@ function handleDir(d){
   if(d==='right')movePlayer(0,1);
 }
 function bindTap(el, fn){
-  const fire=(e)=>{ if(e){e.preventDefault();} try{fn();}catch(err){window.onerror(err.message);} };
+  const fire=(e)=>{ if(e){e.preventDefault();} try{fn();}catch(err){console.error(err);} };
   el.addEventListener('click', fire);
   el.addEventListener('touchstart', fire, {passive:false});
 }
 function bindDir(btn, dir){
-  const fire=(e)=>{ if(e){e.preventDefault();} try{handleDir(dir);}catch(err){window.onerror(err.message);} };
+  const fire=(e)=>{ if(e){e.preventDefault();} try{handleDir(dir);}catch(err){} };
   btn.addEventListener('click', fire);
   btn.addEventListener('touchstart', fire, {passive:false});
 }
@@ -792,7 +807,8 @@ bindDir($('upBtn'),'up');
 bindDir($('downBtn'),'down');
 bindDir($('leftBtn'),'left');
 bindDir($('rightBtn'),'right');
-$('actionBtn').onclick=()=>{ if(state==='play'){paused=!paused; if(paused)show('pauseScreen'); else hideAll();} };
+function togglePause(){ if(state!=='play'||qOpen)return; paused=!paused; if(paused)show('pauseScreen'); else hideAll(); }
+$('actionBtn').onclick=togglePause;
 
 document.addEventListener('keydown',e=>{
   if(state!=='play')return;
@@ -801,7 +817,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowDown')handleDir('down');
   if(e.key==='ArrowLeft')handleDir('left');
   if(e.key==='ArrowRight')handleDir('right');
-  if(e.key==='Escape'||e.key==='p'){paused=!paused;if(paused)show('pauseScreen');else hideAll();}
+  if(e.key==='Escape'||e.key==='p')togglePause();
 });
 
 // swipe
@@ -815,7 +831,6 @@ canvas.addEventListener('touchend',e=>{
     if(Math.abs(dx)>Math.abs(dy)){ if(dx>0)handleDir('right'); else handleDir('left'); }
     else { if(dy>0)handleDir('down'); else handleDir('up'); }
   } else {
-    // tap-to-move: move one step toward tapped tile
     const rect=canvas.getBoundingClientRect();
     const c=Math.floor((t.clientX-rect.left-view.offX)/view.ts+view.cx);
     const r=Math.floor((t.clientY-rect.top-view.offY)/view.ts+view.cy);
@@ -834,17 +849,19 @@ canvas.addEventListener('touchend',e=>{
 canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 // ---------- Wiring ----------
-bindTap($('introNext'),()=>{state='level';show('levelScreen');});
+bindTap($('introNext'),()=>goFromIntro());
+bindTap($('qhintBtn'),()=>{ const hb=$('qhintBtn'); if(hb.disabled)return; $('qhint').classList.remove('hidden'); hb.disabled=true; hb.textContent='Hint used'; });
 bindTap($('charStart'),()=>{ if(!char){char=CHARS[0].id;} state='play'; startGame(); });
 bindTap($('continuePortrait'),()=>{ $('rotateScreen').classList.add('hidden'); });
 bindTap($('resumeBtn'),()=>{paused=false;hideAll();});
 bindTap($('quitBtn'),quitToMenu);
 bindTap($('quitGameBtn'),()=>{ if(confirm('Quit game?')) quitToMenu(); });
-bindTap($('pauseBtn'),()=>{ if(state==='play'){paused=!paused;if(paused)show('pauseScreen');else hideAll();} });
+bindTap($('pauseBtn'),togglePause);
 bindTap($('replayBtn'),()=>{ state='play'; startGame(); });
 bindTap($('menuBtn'),quitToMenu);
 
 function quitToMenu(){
+  qToken++; qOpen=false;
   clearInterval(timerInt); clearInterval(monsterInt);
   timerInt=null; monsterInt=null;
   state='intro';
@@ -858,8 +875,7 @@ function checkOrientation(){
   const rs = $('rotateScreen');
   if(!rs) return;
   if(isPortrait && isSmall){
-    // only nag on intro/level/map/char screens, not during play
-    if(state==='intro' || state==='level' || state==='map' || state==='char'){
+    if(state==='intro' || state==='register' || state==='level' || state==='map' || state==='char'){
       rs.classList.remove('hidden');
     }
   } else {
@@ -878,24 +894,42 @@ function setupPlayerCard(){
   const a=$('pAvatar').getContext('2d'); a.clearRect(0,0,16,16);
   drawPortrait(a,64,ch.id,ch.color);
 }
+const DEFAULT_BOARD=[{n:'Stranger',s:2800},{n:'Eleven',s:2430},{n:'Dustin',s:2010},{n:'Lucas',s:1760},{n:'Max',s:1420}];
 function loadBoard(){
-  try{const b=JSON.parse(localStorage.getItem('msd_board')); if(Array.isArray(b)&&b.length)return b;}catch(e){}
-  return [{n:'Stranger',s:2800},{n:'Eleven',s:2430},{n:'Dustin',s:2010},{n:'Lucas',s:1760},{n:'Max',s:1420}];
+  const raw=store.get('msd_board');
+  if(raw===null||raw===undefined) return DEFAULT_BOARD.slice();   // nothing saved yet: show the starter scores
+  try{const b=JSON.parse(raw); if(Array.isArray(b)) return b;}catch(e){}
+  return [];                                                       // saved but empty (cleared) stays empty
 }
 let lastScore=null;
 function renderBoard(){
   const l=$('boardList'); l.innerHTML='';
-  loadBoard().slice(0,5).forEach((e,i)=>{
+  const b=loadBoard().slice(0,5);
+  if(!b.length){const li=document.createElement('li'); li.className='empty'; li.textContent='No scores yet'; l.appendChild(li); return;}
+  b.forEach((e,i)=>{
     const li=document.createElement('li'); if(e.s===lastScore)li.className='me';
-    li.innerHTML=`<span class="rk">${i+1}</span><span class="nm">${e.n}</span><span class="sc">${e.s}</span>`;
-    l.appendChild(li);
+    const rk=document.createElement('span'); rk.className='rk'; rk.textContent=i+1;
+    const nm=document.createElement('span'); nm.className='nm'; nm.textContent=e.n;
+    const sc=document.createElement('span'); sc.className='sc'; sc.textContent=e.s;
+    li.append(rk,nm,sc); l.appendChild(li);
   });
 }
-function getPlayerName(){ return localStorage.getItem('msd_name') || null; }
+function getPlayerName(){ return store.get('msd_name') || null; }
+function setPlayerName(n){ store.set('msd_name',n); }
+function openRegister(){
+  state='register'; setNav('play');
+  regName.value=getPlayerName()||''; regName.classList.remove('bad'); regErr.textContent='';
+  show('registerScreen');
+  setTimeout(()=>{ try{regName.focus();}catch(e){} },60);
+}
+function goFromIntro(){
+  if(getPlayerName()){ state='level'; show('levelScreen'); }
+  else openRegister();
+}
 function addScore(sc){
   const name = getPlayerName() || (CHARS.find(x=>x.id===char)||CHARS[0]).name;
   const b=loadBoard(); b.push({n:name,s:sc}); b.sort((x,y)=>y.s-x.s);
-  localStorage.setItem('msd_board',JSON.stringify(b.slice(0,5))); lastScore=sc; renderBoard();
+  store.set('msd_board',JSON.stringify(b.slice(0,5))); lastScore=sc; renderBoard();
 }
 function validateName(name){
   name=(name||'').trim();
@@ -903,7 +937,7 @@ function validateName(name){
   if(!/^[A-Za-z0-9 _-]+$/.test(name)) return 'Only letters, numbers, spaces, _ or -.';
   return '';
 }
-function clearBoard(){ localStorage.removeItem('msd_board'); renderBoard(); toast('Leaderboard cleared'); }
+function clearBoard(){ store.set('msd_board','[]'); lastScore=null; renderBoard(); toast('Leaderboard cleared'); }
 function setNav(n){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===n));}
 function openInfo(id){
   if(state==='play') paused=true;
@@ -912,11 +946,12 @@ function openInfo(id){
   show(id);
 }
 document.querySelectorAll('.nav button').forEach(b=>bindTap(b,()=>{
+  if(qOpen)return;
   const n=b.dataset.nav; setNav(n);
   if(n==='home') quitToMenu();
   else if(n==='play'){
-    if(state==='play'){paused=false;hideAll();}
-    else if(!getPlayerName()){ state='register'; show('registerScreen'); }
+    if(state==='play'){ if(!qOpen){paused=false;hideAll();} }
+    else if(!getPlayerName()) openRegister();
     else {state='level';show('levelScreen');}
   }
   else openInfo(n==='how'?'howScreen':'aboutScreen');
@@ -924,18 +959,21 @@ document.querySelectorAll('.nav button').forEach(b=>bindTap(b,()=>{
 document.querySelectorAll('[data-back]').forEach(b=>bindTap(b,()=>{show(infoBack);setNav(state==='play'?'play':'home');}));
 // register screen
 const regContinue=$('regContinue'), regBack=$('regBack'), regName=$('regName'), regErr=$('regErr');
-if(regContinue) bindTap(regContinue,()=>{
+function submitName(){
   const err=validateName(regName.value);
-  if(err){ if(regErr){regErr.textContent=err;regErr.style.display='block';} return; }
-  if(regErr) regErr.style.display='none';
+  regName.classList.toggle('bad',!!err);
+  regErr.textContent=err;
+  if(err) return;
   setPlayerName(regName.value.trim());
   setupPlayerCard();
   state='level'; show('levelScreen');
-});
-if(regBack) bindTap(regBack,()=>{ state='intro'; show('introScreen'); setNav('home'); });
+}
+bindTap(regContinue,submitName);
+bindTap(regBack,()=>{ state='intro'; show('introScreen'); setNav('home'); });
+regName.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();submitName();} });
+regName.addEventListener('input',()=>{ regErr.textContent=''; regName.classList.remove('bad'); });
 // leaderboard clear
-const boardClear=$('boardClear');
-if(boardClear) bindTap(boardClear, clearBoard);
+bindTap($('boardClear'), clearBoard);
 [['upBtn2','up'],['downBtn2','down'],['leftBtn2','left'],['rightBtn2','right']].forEach(([id,d])=>bindDir($(id),d));
 
 drawArt(); drawSky(); renderBoard(); setThreatHUD(null); riftsTotal=PREVIEW.flat().filter(t=>t==='M').length; setupPlayerCard(); updateHUD();
@@ -944,7 +982,7 @@ drawArt(); drawSky(); renderBoard(); setThreatHUD(null); riftsTotal=PREVIEW.flat
 renderLevelGrid(); renderMapGrid(); renderCharGrid();
 
 // fallback: tap anywhere to advance from intro
-document.addEventListener('touchstart', (e)=>{ if(state==='intro' && !e.target.closest('.masthead')){ state='level'; show('levelScreen'); } }, {passive:true});
+document.addEventListener('touchstart', (e)=>{ if(state==='intro' && e.target.closest('.stage') && !e.target.closest('button')){ goFromIntro(); } }, {passive:true});
 
 // initial
 resize();

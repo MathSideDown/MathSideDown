@@ -137,7 +137,7 @@ svg{shape-rendering:crispEdges;}
 .cl{font-family:var(--body);font-size:20px;color:#d8bfc5;line-height:1;text-align:left;}
 .cl em{font-style:normal;color:#9c8189;}
 .plabel{background:none;border:0;cursor:pointer;}
-.note{position:absolute;right:60px;bottom:8px;width:150px;padding:20px 14px;transform:rotate(-8deg);font-family:var(--px);font-size:11px;line-height:1.8;color:#7a0a1c;background:#b0584a;border:4px solid #5a1a20;box-shadow:5px 5px 0 #000;}
+.note{position:absolute;right:60px;bottom:8px;width:150px;padding:20px 14px;transform:rotate(-8deg);font-family:var(--px);font-size:11px;line-height:1.8;color:#7a0a18;background:#b0584a;border:4px solid #5a1a20;box-shadow:5px 5px 0 #000;}
 
 .toast{position:absolute;left:50%;top:10%;transform:translateX(-50%);background:var(--panel);border:4px solid var(--red);padding:10px 16px;font-family:var(--px);font-size:9px;z-index:50;opacity:0;pointer-events:none;box-shadow:4px 4px 0 #000;}
 .toast.show{opacity:1;}
@@ -212,7 +212,6 @@ svg{shape-rendering:crispEdges;}
 .about-actions{display:flex;justify-content:center;}
 .about-actions .btn{width:auto;}
 
-
 /* ---- Register username ---- */
 .reg-field{width:100%;max-width:320px;margin:4px 0 16px;text-align:left;}
 .reg-field label{display:block;font-family:var(--px);font-size:9px;text-transform:uppercase;color:var(--amber);margin-bottom:8px;}
@@ -237,3 +236,11 @@ svg{shape-rendering:crispEdges;}
 .qhint-btn.hidden,.qhint.hidden{display:none!important;}
 .qhint{margin-top:12px;padding:8px 10px;border:4px dashed var(--amber);background:#1c0e06;color:#ffd48a;font-size:22px;line-height:1.05;text-align:center;}
 
+/* ---- Question / leaderboard polish ---- */
+.qtext{overflow-wrap:anywhere;word-break:break-word;}
+.qopt{overflow-wrap:anywhere;}
+.qopt.tx,.qopt.tx2{width:100%;}
+.qhint-btn:disabled{opacity:.5;cursor:default;box-shadow:none;}
+.qcard{max-width:100%;}
+.board li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media (max-width:900px){.qcard{max-height:92vh;overflow-y:auto;}.qtext{font-size:46px;}.qtext.md{font-size:36px;}.qtext.lg{font-size:28px;}.qtext.xl{font-size:22px;}}
