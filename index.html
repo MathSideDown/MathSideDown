@@ -7,111 +7,132 @@
 <title>MathSide Down — Escape the Upside Down</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">MATHSIDE DOWN</div>
-  <div class="hud">
-    <div class="item"><div class="v hearts" id="hearts">♥♥♥</div><div class="l">lives</div></div>
-    <div class="item"><div class="v timer" id="timer">--</div><div class="l">time</div></div>
-    <div class="item"><div class="v score" id="score">0</div><div class="l">score</div></div>
-  </div>
-</div>
+<header class="masthead">
+  <div class="logo"><span class="logo-main">MATHSIDEDOWN</span><span class="logo-sub">MATHSIDE DOWN</span></div>
+  <nav class="nav">
+    <button class="active" data-nav="home">Home</button>
+    <button data-nav="play">Play</button>
+    <button data-nav="how">How to play</button>
+    <button data-nav="about">About</button>
+  </nav>
+  <canvas class="skyline" id="skyCanvas" width="160" height="30"></canvas>
+  <blockquote class="quote">“Solve the math.<br><span>Escape the Upside Down.”</span></blockquote>
+</header>
 
-<div class="stage">
-  <canvas id="gameCanvas"></canvas>
-  <div class="scanlines"></div>
-  <div class="toast" id="toast"></div>
-
-  <!-- INTRO -->
-  <div class="overlay" id="introScreen">
-    <h1>MATHSIDE DOWN</h1>
-    <h2>Escape the Upside Down</h2>
-    <p>Scan the QR code to enter. You are trapped in the Upside Down — a dark mirror of Hawkins. Solve math challenges to open doors, avoid the Demogorgon, and reach the exit before time runs out. Earn extra hearts at Mystery Stations.</p>
-    <p style="font-size:11px;color:var(--amber)">QR Access: scan the code below to open this game on your phone. No app install needed.</p>
-    <img id="qrImg" src="assets/qr-entry.png" alt="QR code to open MathSide Down" style="background:#fff;padding:10px;border-radius:8px;width:180px;height:180px;margin:8px 0;box-shadow:0 0 18px rgba(255,42,61,.4)" />
-    <div style="font-size:10px;color:var(--muted);margin-bottom:10px" id="qrUrl">Scan to open on your phone</div>
-    <button class="btn primary" id="introNext">ENTER</button>
-  </div>
-
-  <!-- LEVEL -->
-  <div class="overlay hidden" id="levelScreen">
-    <h1>CHOOSE LEVEL</h1>
-    <p>Pick your educational level. Math questions will match your skill.</p>
-    <div class="grid cols2" id="levelGrid"></div>
-  </div>
-
-  <!-- MAP -->
-  <div class="overlay hidden" id="mapScreen">
-    <h1>CHOOSE MAP</h1>
-    <p>Each map has a unique maze and theme.</p>
-    <div class="grid cols2" id="mapGrid"></div>
-  </div>
-
-  <!-- CHARACTER -->
-  <div class="overlay hidden" id="charScreen">
-    <h1>CHOOSE CHARACTER</h1>
-    <p>Your avatar in the maze.</p>
-    <div class="grid cols3" id="charGrid"></div>
-    <button class="btn primary" id="charStart" style="margin-top:12px">START GAME</button>
-  </div>
-
-  <!-- PAUSE -->
-  <div class="overlay hidden" id="pauseScreen">
-    <h1>PAUSED</h1>
-    <button class="btn primary" id="resumeBtn">RESUME</button>
-    <button class="btn ghost" id="quitBtn" style="margin-top:8px">QUIT TO MENU</button>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="overlay hidden" id="resultScreen">
-    <h1 id="resultTitle">VICTORY</h1>
-    <h2 id="resultSub">You escaped!</h2>
-    <div class="big" id="resultScore">0</div>
-    <div class="res-list" id="resultList"></div>
-    <button class="btn primary" id="replayBtn">PLAY AGAIN</button>
-    <button class="btn ghost" id="menuBtn" style="margin-top:8px">MAIN MENU</button>
-  </div>
-
-  <!-- Question modal -->
-  <div class="qmodal hidden" id="qmodal">
-    <div class="qcard">
-      <div class="qtype" id="qtype">MATH CHALLENGE</div>
-      <div class="qtext" id="qtext">2 + 2 = ?</div>
-      <div class="qopts" id="qopts"></div>
-      <div class="qmeta" id="qmeta">Correct = open door · Wrong = lose a heart</div>
+<main class="layout">
+  <aside class="panel stats">
+    <h3 class="ph">Player stats</h3>
+    <div class="who"><canvas id="pAvatar" width="16" height="16"></canvas><span id="pName">Eleven</span></div>
+    <div class="stat"><svg class="ic" viewBox="0 0 24 24"><path d="M12 21S3 14.5 3 8.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9 2.5C21 14.5 12 21 12 21Z"/><path d="M8 11h3l1.5-3 1.5 5 1-2h2"/></svg><span class="k">Lives</span><span class="v hearts" id="hearts">♥♥♥</span></div>
+    <div class="stat"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg><span class="k">Score</span><span class="v score" id="score">0000</span></div>
+    <div class="stat"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="k">Time</span><span class="v timer" id="timer">02:00</span></div>
+    <div class="threat">
+      <h3 class="ph">Demogorgon</h3>
+      <div class="trow"><span>Speed</span><span id="spdPips"></span></div>
+      <div class="trow"><span>IQ</span><span id="iqPips"></span></div>
+      <div class="tmode" id="threatMode">Dormant</div>
     </div>
-  </div>
-</div>
+    <div class="mission">
+      <h3 class="ph">Mission</h3>
+      <p>Find the exit.<br>Solve the math.<br>Survive.</p>
+      <div class="prog-l"><span>Rifts Cleared</span><span id="riftCount">0 / 0</span></div>
+      <div class="bar"><i id="riftBar"></i></div>
+    </div>
+    <figure class="art">
+      <canvas id="artCanvas" width="96" height="48" role="img" aria-label="A Demogorgon in a red Upside Down forest"></canvas>
+      <figcaption>The Upside Down is closer<br>than you think…</figcaption>
+    </figure>
+  </aside>
 
-<!-- Rotate prompt (portrait) -->
-<div class="overlay hidden" id="rotateScreen" style="z-index:60;">
-  <h1>ROTATE</h1>
-  <h2>Landscape plays best</h2>
+  <section class="stage">
+    <canvas id="gameCanvas"></canvas>
+    <div class="scanlines"></div>
+    <div class="toast" id="toast"></div>
+
+    <div class="overlay" id="introScreen">
+      <h1>MATHSIDE DOWN</h1>
+      <h2>Escape the Upside Down</h2>
+      <p>You are trapped in the Upside Down — a dark mirror of Hawkins. Solve math challenges to open doors, avoid the Demogorgon, and reach the exit before time runs out. Earn extra hearts at Mystery Stations.</p>
+      <img id="qrImg" src="assets/qr-entry.png" alt="QR code to open MathSide Down" />
+      <div class="qr-note" id="qrUrl">Scan to play on your phone</div>
+      <button class="btn primary" id="introNext">Enter</button>
+    </div>
+    <div class="overlay hidden" id="levelScreen"><h1>CHOOSE LEVEL</h1><p>Pick your educational level. Math questions will match your skill.</p><div class="grid cols2" id="levelGrid"></div></div>
+    <div class="overlay hidden" id="mapScreen"><h1>CHOOSE MAP</h1><p>Each map has a unique maze and theme.</p><div class="grid cols2" id="mapGrid"></div></div>
+    <div class="overlay hidden" id="charScreen"><h1>CHOOSE CHARACTER</h1><p>Your avatar in the maze.</p><div class="grid cols3" id="charGrid"></div><button class="btn primary" id="charStart" style="margin-top:12px">Start game</button></div>
+    <div class="overlay hidden" id="howScreen"><h1>HOW TO PLAY</h1><p>Move with W A S D, the arrow keys, or swipe on a phone. Step on a glowing rift to answer a math question: right opens the way and scores points, wrong costs a heart. Star stations give an extra heart. The maze scrolls as you move. Correct answers add time. The Demogorgon gets faster and smarter with each level — Nursery is clumsy, College is ruthless — so reach the green exit before the timer ends.</p><button class="btn ghost" data-back>Back</button></div>
+    <div class="overlay hidden" id="aboutScreen"><h1>ABOUT</h1><p>MathSide Down is a Stranger Things-inspired maze built for a school exhibit. Pick a level, pick a map, and think fast.</p><button class="btn ghost" data-back>Back</button></div>
+    <div class="overlay hidden" id="pauseScreen"><h1>PAUSED</h1><button class="btn primary" id="resumeBtn">Resume</button><button class="btn ghost" id="quitBtn" style="margin-top:8px">Quit to menu</button></div>
+    <div class="overlay hidden" id="resultScreen"><h1 id="resultTitle">VICTORY</h1><h2 id="resultSub">You escaped!</h2><div class="big" id="resultScore">0</div><div class="res-list" id="resultList"></div><button class="btn primary" id="replayBtn">Play again</button><button class="btn ghost" id="menuBtn" style="margin-top:8px">Main menu</button></div>
+  </section>
+
+  <aside class="side">
+    <div class="panel rift">
+      <div class="rift-box">
+        <h3 class="rift-title">Dimensional rift</h3>
+        <div class="rift-body">
+          <div class="qmodal hidden" id="qmodal">
+            <div class="qcard">
+              <div class="qtype" id="qtype">A math challenge awaits…</div>
+              <div class="qtext" id="qtext">2 + 2 = ?</div>
+              <div class="qopts" id="qopts"></div>
+              <div class="qmeta" id="qmeta">Correct opens the door · Wrong costs a heart</div>
+            </div>
+          </div>
+          <div class="rift-idle">
+            <div class="qtype">A math challenge awaits…</div>
+            <div class="qtext">? × ? = ?</div>
+            <div class="qopts"><span class="qopt ghosted">?</span><span class="qopt ghosted">?</span><span class="qopt ghosted">?</span><span class="qopt ghosted">?</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel board">
+      <h3 class="ph lb"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0ZM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>Leaderboard<span class="chev">›</span></h3>
+      <ol id="boardList"></ol>
+    </div>
+  </aside>
+</main>
+
+<footer class="controls">
+  <div class="lab"><svg class="rad" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none"/><path d="M12 12L7 4a10 10 0 0 1 10 0ZM12 12l-5 8a10 10 0 0 1-5-8ZM12 12h10a10 10 0 0 1-5 8Z" opacity=".85"/></svg><span>Hawkins Laboratory<br>Dimension 001</span></div>
+  <div class="ctl">
+    <div class="grp">
+      <div class="keys wasd">
+        <button class="key" id="upBtn" style="grid-column:2">W</button>
+        <button class="key" id="leftBtn" style="grid-column:1;grid-row:2">A</button>
+        <button class="key" id="downBtn" style="grid-column:2;grid-row:2">S</button>
+        <button class="key" id="rightBtn" style="grid-column:3;grid-row:2">D</button>
+      </div>
+      <span class="cl">Move<br><em>(W / A / S / D)</em></span>
+    </div>
+    <div class="grp arrows">
+      <div class="keys">
+        <button class="key" id="upBtn2" style="grid-column:2">▲</button>
+        <button class="key" id="leftBtn2" style="grid-column:1;grid-row:2">◀</button>
+        <button class="key" id="downBtn2" style="grid-column:2;grid-row:2">▼</button>
+        <button class="key" id="rightBtn2" style="grid-column:3;grid-row:2">▶</button>
+      </div>
+      <span class="cl">Arrow keys<br><em>(↑ ← ↓ →)</em></span>
+    </div>
+    <div class="grp">
+      <button class="key pause" id="actionBtn" aria-label="Pause"><i></i><i></i></button>
+      <button class="cl plabel" id="pauseBtn">Pause<br><em>(P / ESC)</em></button>
+    </div>
+    <button id="quitGameBtn" hidden>Quit</button>
+  </div>
+  <div class="note" aria-hidden="true">Hawkins<br>1986</div>
+</footer>
+
+<div class="overlay hidden" id="rotateScreen">
+  <h1>ROTATE</h1><h2>Landscape plays best</h2>
   <p>The maze is wide. Rotate your phone sideways for the best view, or continue in portrait.</p>
-  <button class="btn primary" id="continuePortrait">CONTINUE PORTRAIT</button>
-</div>
-
-<div class="bottom">
-  <div class="dpad">
-    <div class="empty"></div>
-    <button id="upBtn">▲</button>
-    <div class="empty"></div>
-    <button id="leftBtn">◀</button>
-    <button id="actionBtn" style="font-size:14px">⏸</button>
-    <button id="rightBtn">▶</button>
-    <div class="empty"></div>
-    <button id="downBtn">▼</button>
-    <div class="empty"></div>
-  </div>
-  <div class="bottom-row">
-    <button class="mini" id="pauseBtn">PAUSE</button>
-    <button class="mini danger" id="quitGameBtn">QUIT</button>
-  </div>
-
+  <button class="btn primary" id="continuePortrait">Continue portrait</button>
 </div>
 
 <script src="script.js"></script>
