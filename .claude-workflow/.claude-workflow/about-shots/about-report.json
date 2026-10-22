@@ -1,0 +1,226 @@
+[
+  {
+    "device": "iphone14-portrait",
+    "size": "390x844",
+    "visible": true,
+    "overlay": {
+      "w": 362,
+      "h": 583,
+      "scrollH": 603,
+      "clientH": 583,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 322,
+      "h": 583
+    },
+    "canScroll": true,
+    "topClipped": false,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "30px",
+      "lede": "18px",
+      "tag": "18px",
+      "h": "23.4px",
+      "crewName": "20px"
+    },
+    "errors": []
+  },
+  {
+    "device": "android-portrait",
+    "size": "360x740",
+    "visible": true,
+    "overlay": {
+      "w": 332,
+      "h": 479,
+      "scrollH": 551,
+      "clientH": 479,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 292,
+      "h": 583
+    },
+    "canScroll": true,
+    "topClipped": true,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "30px",
+      "lede": "18px",
+      "tag": "18px",
+      "h": "23.4px",
+      "crewName": "20px"
+    },
+    "errors": []
+  },
+  {
+    "device": "se-portrait",
+    "size": "320x568",
+    "visible": true,
+    "overlay": {
+      "w": 292,
+      "h": 302,
+      "scrollH": 491,
+      "clientH": 302,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 252,
+      "h": 639
+    },
+    "canScroll": true,
+    "topClipped": true,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "30px",
+      "lede": "18px",
+      "tag": "18px",
+      "h": "23.4px",
+      "crewName": "20px"
+    },
+    "errors": []
+  },
+  {
+    "device": "iphone14-landscape",
+    "size": "844x390",
+    "visible": true,
+    "overlay": {
+      "w": 816,
+      "h": 120,
+      "scrollH": 339,
+      "clientH": 120,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 460,
+      "h": 519
+    },
+    "canScroll": true,
+    "topClipped": true,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "30px",
+      "lede": "22px",
+      "tag": "22px",
+      "h": "23.4px",
+      "crewName": "20px"
+    },
+    "errors": []
+  },
+  {
+    "device": "android-landscape",
+    "size": "740x360",
+    "visible": true,
+    "overlay": {
+      "w": 712,
+      "h": 90,
+      "scrollH": 975,
+      "clientH": 90,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 560,
+      "h": 935
+    },
+    "canScroll": true,
+    "topClipped": false,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "11px",
+      "lede": "21px",
+      "tag": "24px",
+      "h": "9px",
+      "crewName": "26px"
+    },
+    "errors": []
+  },
+  {
+    "device": "tablet-landscape",
+    "size": "1180x820",
+    "visible": true,
+    "overlay": {
+      "w": 506,
+      "h": 516,
+      "scrollH": 1003,
+      "clientH": 516,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 466,
+      "h": 963
+    },
+    "canScroll": true,
+    "topClipped": false,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "11px",
+      "lede": "21px",
+      "tag": "24px",
+      "h": "9px",
+      "crewName": "26px"
+    },
+    "errors": []
+  },
+  {
+    "device": "desktop",
+    "size": "1440x900",
+    "visible": true,
+    "overlay": {
+      "w": 766,
+      "h": 596,
+      "scrollH": 975,
+      "clientH": 596,
+      "overflowY": "auto"
+    },
+    "inner": {
+      "w": 560,
+      "h": 935
+    },
+    "canScroll": true,
+    "topClipped": false,
+    "backReachable": true,
+    "backBtn": {
+      "w": 96,
+      "h": 47,
+      "visible": true
+    },
+    "computed": {
+      "sub": "11px",
+      "lede": "21px",
+      "tag": "24px",
+      "h": "9px",
+      "crewName": "26px"
+    },
+    "errors": []
+  }
+]

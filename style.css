@@ -147,8 +147,8 @@ svg{shape-rendering:crispEdges;}
 @media (max-width:1100px){.layout{grid-template-columns:230px minmax(0,1fr) 250px;padding:14px 16px 8px;gap:14px;}.quote,.controls .lab,.note{display:none;}.masthead{padding-left:24px;}.qtext{font-size:46px;}.nav button{font-size:8px;padding:10px 8px;}}
 @media (max-width:900px){
   .masthead{height:auto;padding:6px 10px;gap:8px;border-bottom-width:4px;}
-  .logo{margin-right:0;}.logo-main{font-size:20px;text-shadow:2px 2px 0 #5a0010;}.logo-sub{font-size:6px;margin-top:6px;}
-  .nav{gap:4px;flex:1;justify-content:flex-end;}.nav button{padding:7px 5px;font-size:6px;border-width:3px;}
+  .logo{margin-right:0;min-width:0;flex-shrink:1;}.logo-main{font-size:20px;text-shadow:2px 2px 0 #5a0010;}.logo-sub{font-size:6px;margin-top:6px;}
+  .nav{gap:4px;flex:1 1 auto;min-width:0;justify-content:flex-end;}.nav button{padding:7px 5px;font-size:6px;border-width:3px;}
   .layout{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:10px;padding:10px;}
   .stats{flex-direction:row;align-items:center;justify-content:space-between;padding:6px 10px;gap:8px;}
   .stats .ph,.mission,.threat,.art,.stat .ic,.stat .k,.board,.rift-title,.rift-idle{display:none;}
@@ -165,4 +165,45 @@ svg{shape-rendering:crispEdges;}
   .keys{grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,42px);}
   .stage{border-width:4px;}
 }
+/* Narrow phones: the 12-glyph logo must yield width to the nav, or the nav
+   buttons sit off-screen and become untappable (About was unreachable at 320px). */
+@media (max-width:430px){
+  .logo-main{font-size:9px;letter-spacing:0;line-height:1.2;}
+  .logo-sub{font-size:5px;margin-top:4px;letter-spacing:0;}
+  .nav{gap:3px;}
+  .nav button{padding:6px 4px;font-size:5px;letter-spacing:0;}
+  .about .about-lede,.about .about-tag{font-size:18px;}
+  .crew .name{font-size:20px;}
+  .crew .role{font-size:16px;}
+  .spec-row{font-size:17px;gap:8px;padding:6px 9px;}
+}
 @media (prefers-reduced-motion:reduce){.float{animation-duration:.01s;}}
+
+/* ---- About ---- */
+/* .overlay is a centered flex scroll container: justify-content:center pushes
+   overflow past the top edge where it cannot be scrolled to. Auto margins on
+   the child center it when there is room and collapse to 0 when there is not. */
+#aboutScreen{justify-content:flex-start;}
+.about{width:min(560px,100%);margin:auto 0;display:flex;flex-direction:column;align-items:stretch;}
+.about h1{margin-bottom:16px;}
+/* .overlay h2/p are more specific than a bare class — scope these explicitly */
+.about .about-sub{font-family:var(--px);font-size:11px;line-height:1.6;color:var(--amber);
+  text-shadow:2px 2px 0 #000;margin:2px 0 14px;}
+.about .about-lede{color:#c2a6ad;font-size:21px;line-height:1.3;margin:0 0 22px;text-align:center;max-width:none;}
+.about .about-h{font-family:var(--px);font-weight:400;font-size:9px;line-height:1.4;color:var(--red);
+  text-shadow:2px 2px 0 #000;letter-spacing:1px;margin:0 0 12px;padding-bottom:8px;
+  border-bottom:4px solid #2a0610;text-align:left;}
+.crew{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0 0 24px;}
+.crew li{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:8px 12px;background:var(--panel2);border:4px solid #3a1420;box-shadow:0 4px 0 #000;}
+.crew .name{font-family:var(--body);font-size:26px;color:var(--text);line-height:1;}
+.crew .role{font-family:var(--body);font-size:20px;color:var(--amber);white-space:nowrap;}
+.specs{display:flex;flex-direction:column;gap:6px;margin:0 0 22px;}
+.spec-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:7px 12px;background:var(--panel2);border:4px solid #3a1420;font-size:21px;line-height:1.1;}
+.spec-row .k{color:var(--muted);}
+.spec-row .v{color:var(--cyan);text-align:right;}
+.about .about-tag{font-family:var(--body);font-size:24px;color:#f0d8dd;margin:0 0 20px;text-align:center;max-width:none;}
+.about-actions{display:flex;justify-content:center;}
+.about-actions .btn{width:auto;}
+

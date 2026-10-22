@@ -66,7 +66,35 @@
     <div class="overlay hidden" id="mapScreen"><h1>CHOOSE MAP</h1><p>Each map has a unique maze and theme.</p><div class="grid cols2" id="mapGrid"></div></div>
     <div class="overlay hidden" id="charScreen"><h1>CHOOSE CHARACTER</h1><p>Your avatar in the maze.</p><div class="grid cols3" id="charGrid"></div><button class="btn primary" id="charStart" style="margin-top:12px">Start game</button></div>
     <div class="overlay hidden" id="howScreen"><h1>HOW TO PLAY</h1><p>Move with W A S D, the arrow keys, or swipe on a phone. Step on a glowing rift to answer a math question: right opens the way and scores points, wrong costs a heart. Star stations give an extra heart. The maze scrolls as you move. Correct answers add time. The Demogorgon gets faster and smarter with each level — Nursery is clumsy, College is ruthless — so reach the green exit before the timer ends.</p><button class="btn ghost" data-back>Back</button></div>
-    <div class="overlay hidden" id="aboutScreen"><h1>ABOUT</h1><p>MathSide Down is a Stranger Things-inspired maze built for a school exhibit. Pick a level, pick a map, and think fast.</p><button class="btn ghost" data-back>Back</button></div>
+    <div class="overlay hidden" id="aboutScreen">
+      <div class="about">
+        <h1>ABOUT</h1>
+        <h2 class="about-sub">THE TEAM BEHIND MATHSIDE DOWN</h2>
+        <p class="about-lede">Meet the minds behind the mission. We are a team of students who collaborated to create an educational gaming experience that combines mathematics, creativity, and adventure.</p>
+
+        <h3 class="about-h">DEVELOPED BY</h3>
+        <ol class="crew">
+          <li><span class="name">Gabay, Eztli Eunice M.</span></li>
+          <li><span class="name">Hanga-An, Janelle T.</span></li>
+          <li><span class="name">Racuya, Yllaine M.</span></li>
+          <li><span class="name">Alabarta, Jenevieve V.</span></li>
+          <li><span class="name">Favor, Hilary Ysabelle G.</span></li>
+          <li><span class="name">Flores, Aaron Joshua</span></li>
+        </ol>
+
+        <h3 class="about-h">PROJECT DETAILS</h3>
+        <div class="specs">
+          <div class="spec-row"><span class="k">Project</span><span class="v">MathSide Down</span></div>
+          <div class="spec-row"><span class="k">Purpose</span><span class="v">Educational Web-Based Game</span></div>
+          <div class="spec-row"><span class="k">Developed for</span><span class="v">Mathematics in modern world</span></div>
+          <div class="spec-row"><span class="k">School</span><span class="v">New Era University</span></div>
+        </div>
+
+        <p class="about-tag">One team. One mission. Solve to survive.</p>
+
+        <div class="about-actions"><button class="btn ghost" data-back>Back</button></div>
+      </div>
+    </div>
     <div class="overlay hidden" id="pauseScreen"><h1>PAUSED</h1><button class="btn primary" id="resumeBtn">Resume</button><button class="btn ghost" id="quitBtn" style="margin-top:8px">Quit to menu</button></div>
     <div class="overlay hidden" id="resultScreen"><h1 id="resultTitle">VICTORY</h1><h2 id="resultSub">You escaped!</h2><div class="big" id="resultScore">0</div><div class="res-list" id="resultList"></div><button class="btn primary" id="replayBtn">Play again</button><button class="btn ghost" id="menuBtn" style="margin-top:8px">Main menu</button></div>
   </section>
