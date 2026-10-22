@@ -62,6 +62,18 @@
       <div class="qr-note" id="qrUrl">Scan to play on your phone</div>
       <button class="btn primary" id="introNext">Enter</button>
     </div>
+    <div class="overlay hidden" id="registerScreen">
+      <h1>REGISTER</h1>
+      <h2 id="regSub">Choose your username</h2>
+      <p>Your name appears on the leaderboard and in your player stats. 3-12 characters: letters, numbers, spaces, _ or -.</p>
+      <div class="reg-field">
+        <label for="regName">Username</label>
+        <input id="regName" type="text" maxlength="12" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. Eleven86" />
+        <div class="reg-err" id="regErr" role="alert"></div>
+      </div>
+      <button class="btn primary" id="regContinue">Continue</button>
+      <button class="btn ghost" id="regBack" style="margin-top:8px">Back</button>
+    </div>
     <div class="overlay hidden" id="levelScreen"><h1>CHOOSE LEVEL</h1><p>Pick your educational level. Math questions will match your skill.</p><div class="grid cols2" id="levelGrid"></div></div>
     <div class="overlay hidden" id="mapScreen"><h1>CHOOSE MAP</h1><p>Each map has a unique maze and theme.</p><div class="grid cols2" id="mapGrid"></div></div>
     <div class="overlay hidden" id="charScreen"><h1>CHOOSE CHARACTER</h1><p>Your avatar in the maze.</p><div class="grid cols3" id="charGrid"></div><button class="btn primary" id="charStart" style="margin-top:12px">Start game</button></div>
@@ -109,6 +121,8 @@
               <div class="qtype" id="qtype">A math challenge awaits…</div>
               <div class="qtext" id="qtext">2 + 2 = ?</div>
               <div class="qopts" id="qopts"></div>
+              <button class="qhint-btn hidden" id="qhintBtn" type="button">? Hint</button>
+              <div class="qhint hidden" id="qhint"></div>
               <div class="qmeta" id="qmeta">Correct opens the door · Wrong costs a heart</div>
             </div>
           </div>
@@ -121,7 +135,7 @@
       </div>
     </div>
     <div class="panel board">
-      <h3 class="ph lb"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0ZM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>Leaderboard<span class="chev">›</span></h3>
+      <h3 class="ph lb"><svg class="ic" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0ZM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 20h8"/></svg>Leaderboard<button class="chev" id="boardClear" title="Clear leaderboard" aria-label="Clear leaderboard">CLEAR</button></h3>
       <ol id="boardList"></ol>
     </div>
   </aside>
