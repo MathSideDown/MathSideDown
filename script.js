@@ -873,7 +873,8 @@ window.addEventListener('orientationchange', ()=>{ setTimeout(checkOrientation, 
 let riftsDone=0, riftsTotal=0, infoBack='introScreen';
 function setupPlayerCard(){
   const ch=CHARS.find(x=>x.id===char)||CHARS[0];
-  $('pName').textContent=ch.name;
+  const name=getPlayerName();
+  $('pName').textContent=name||ch.name;
   const a=$('pAvatar').getContext('2d'); a.clearRect(0,0,16,16);
   drawPortrait(a,64,ch.id,ch.color);
 }
@@ -890,11 +891,19 @@ function renderBoard(){
     l.appendChild(li);
   });
 }
+function getPlayerName(){ return localStorage.getItem('msd_name') || null; }
 function addScore(sc){
-  const ch=CHARS.find(x=>x.id===char)||CHARS[0];
-  const b=loadBoard(); b.push({n:ch.name,s:sc}); b.sort((x,y)=>y.s-x.s);
+  const name = getPlayerName() || (CHARS.find(x=>x.id===char)||CHARS[0]).name;
+  const b=loadBoard(); b.push({n:name,s:sc}); b.sort((x,y)=>y.s-x.s);
   localStorage.setItem('msd_board',JSON.stringify(b.slice(0,5))); lastScore=sc; renderBoard();
 }
+function validateName(name){
+  name=(name||'').trim();
+  if(name.length<3||name.length>12) return 'Name must be 3-12 characters.';
+  if(!/^[A-Za-z0-9 _-]+$/.test(name)) return 'Only letters, numbers, spaces, _ or -.';
+  return '';
+}
+function clearBoard(){ localStorage.removeItem('msd_board'); renderBoard(); toast('Leaderboard cleared'); }
 function setNav(n){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===n));}
 function openInfo(id){
   if(state==='play') paused=true;
@@ -905,10 +914,28 @@ function openInfo(id){
 document.querySelectorAll('.nav button').forEach(b=>bindTap(b,()=>{
   const n=b.dataset.nav; setNav(n);
   if(n==='home') quitToMenu();
-  else if(n==='play'){ if(state==='play'){paused=false;hideAll();} else {state='level';show('levelScreen');} }
+  else if(n==='play'){
+    if(state==='play'){paused=false;hideAll();}
+    else if(!getPlayerName()){ state='register'; show('registerScreen'); }
+    else {state='level';show('levelScreen');}
+  }
   else openInfo(n==='how'?'howScreen':'aboutScreen');
 }));
 document.querySelectorAll('[data-back]').forEach(b=>bindTap(b,()=>{show(infoBack);setNav(state==='play'?'play':'home');}));
+// register screen
+const regContinue=$('regContinue'), regBack=$('regBack'), regName=$('regName'), regErr=$('regErr');
+if(regContinue) bindTap(regContinue,()=>{
+  const err=validateName(regName.value);
+  if(err){ if(regErr){regErr.textContent=err;regErr.style.display='block';} return; }
+  if(regErr) regErr.style.display='none';
+  setPlayerName(regName.value.trim());
+  setupPlayerCard();
+  state='level'; show('levelScreen');
+});
+if(regBack) bindTap(regBack,()=>{ state='intro'; show('introScreen'); setNav('home'); });
+// leaderboard clear
+const boardClear=$('boardClear');
+if(boardClear) bindTap(boardClear, clearBoard);
 [['upBtn2','up'],['downBtn2','down'],['leftBtn2','left'],['rightBtn2','right']].forEach(([id,d])=>bindDir($(id),d));
 
 drawArt(); drawSky(); renderBoard(); setThreatHUD(null); riftsTotal=PREVIEW.flat().filter(t=>t==='M').length; setupPlayerCard(); updateHUD();
