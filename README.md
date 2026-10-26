@@ -3,7 +3,7 @@
 A Stranger Things-inspired maze game where players solve math challenges to escape the Upside Down. Built for a school exhibit — scan the QR code to play on your phone, no app install needed.
 
 ## Play
-Live at: https://dumasjarednathan00-rgb.github.io/mathside-down/
+Live at:  https://mathsidedown.github.io/MathSideDown/
 
 ## Run locally
 Open `index.html` in any browser. No server or install needed.
