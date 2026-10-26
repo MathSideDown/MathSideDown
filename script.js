@@ -9,6 +9,9 @@ const bgMusic = new Audio('assets/sounds/bgmusic.mp3');
 bgMusic.loop = true;
 bgMusic.volume = MUSIC_VOL;
 bgMusic.preload = 'auto';
+bgMusic.addEventListener('error', () => {
+  console.error('[MathSide Down] Background music failed to load:', bgMusic.currentSrc || bgMusic.src);
+});
 let musicMuted = localStorage.getItem('msd_music_muted') === '1';
 let duckCount = 0;
 function applyMusicVolume(){
@@ -31,11 +34,13 @@ updateMusicBtn();
 // Browsers block autoplay until a user gesture. Phones suppress 'click' on buttons that use
 // touchstart+preventDefault, so listen to several gesture events and keep retrying until it plays.
 const UNLOCK_EVENTS = ['pointerup','touchend','click','keydown'];
-function unlockMusic(){
+function unlockMusic(e){
+  // Let the Music toggle's own click handler control its on/off state.
+  if(e && e.target && e.target.closest && e.target.closest('#musicToggle')) return;
   if(musicMuted) return;
   bgMusic.play().then(()=>{
     UNLOCK_EVENTS.forEach(ev=>document.removeEventListener(ev, unlockMusic, true));
-  }).catch(err=>console.warn('[MathSide Down] Music blocked, will retry on next tap:', err));
+  }).catch(err=>console.warn('[MathSide Down] Music could not start yet:', err));
 }
 UNLOCK_EVENTS.forEach(ev=>document.addEventListener(ev, unlockMusic, true));
 if(musicBtn){
@@ -52,6 +57,9 @@ function makeSfx(src, volume){
   const base = new Audio(src);
   base.volume = volume;
   base.preload = 'auto';
+  base.addEventListener('error', () => {
+    console.error('[MathSide Down] Sound effect failed to load:', src);
+  });
   return function(){
     try{
       const s = base.cloneNode(true);
@@ -1011,6 +1019,8 @@ function openRegister(){
   setTimeout(()=>{ try{regName.focus();}catch(e){} },60);
 }
 function goFromIntro(){
+  // Start music directly in the player's Enter gesture for mobile-browser compatibility.
+  tryStartMusic();
   if(getPlayerName()){ state='level'; show('levelScreen'); }
   else openRegister();
 }
