@@ -2,6 +2,71 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// ---------- Background music ----------
+const MUSIC_VOL = 0.35;
+const MUSIC_DUCK_VOL = 0.08; // how low the music dips while a sound effect plays
+const bgMusic = new Audio('assets/sounds/bgmusic.mp3');
+bgMusic.loop = true;
+bgMusic.volume = MUSIC_VOL;
+bgMusic.preload = 'auto';
+let musicMuted = localStorage.getItem('msd_music_muted') === '1';
+let duckCount = 0;
+function applyMusicVolume(){
+  if(musicMuted)return;
+  bgMusic.volume = duckCount > 0 ? MUSIC_DUCK_VOL : MUSIC_VOL;
+}
+function duckMusicStart(){ duckCount++; applyMusicVolume(); }
+function duckMusicEnd(){ duckCount = Math.max(0, duckCount-1); applyMusicVolume(); }
+const musicBtn = document.getElementById('musicToggle');
+function updateMusicBtn(){
+  if(!musicBtn)return;
+  musicBtn.textContent = musicMuted ? '♪ Off' : '♪ Music';
+  musicBtn.classList.toggle('music-off', musicMuted);
+}
+function tryStartMusic(){
+  if(musicMuted) return;
+  bgMusic.play().catch(()=>{});
+}
+updateMusicBtn();
+// Browsers block autoplay until a user gesture, so kick it off on first interaction
+document.addEventListener('click', tryStartMusic, {once:true});
+if(musicBtn){
+  musicBtn.addEventListener('click', ()=>{
+    musicMuted = !musicMuted;
+    localStorage.setItem('msd_music_muted', musicMuted ? '1' : '0');
+    if(musicMuted) bgMusic.pause(); else { bgMusic.play().catch(()=>{}); applyMusicVolume(); }
+    updateMusicBtn();
+  });
+}
+
+// ---------- Sound effects (duck the music while they play) ----------
+function makeSfx(src, volume){
+  const base = new Audio(src);
+  base.volume = volume;
+  base.preload = 'auto';
+  return function(){
+    try{
+      const s = base.cloneNode(true);
+      s.volume = base.volume;
+      duckMusicStart();
+      let settled = false;
+      const finish = ()=>{ if(settled)return; settled = true; duckMusicEnd(); };
+      s.addEventListener('ended', finish);
+      s.addEventListener('error', finish);
+      setTimeout(finish, 2000); // safety net in case 'ended' never fires
+      s.play().catch(finish);
+    }catch(e){}
+  };
+}
+const playUiClick = makeSfx('assets/sounds/click.ogg', 1.0);
+const playCorrect = makeSfx('assets/sounds/correct.mp3', 1.0);
+const playWrong = makeSfx('assets/sounds/wrong.mp3', 1.0);
+
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button');
+  if(btn) playUiClick();
+}, true);
+
 // ---------- Data ----------
 const LEVELS = [
   {id:'preschool',name:'Nursery',desc:'Ages 3-5 · + and -',emoji:' Nursery'},
@@ -90,19 +155,15 @@ function genMaze(mapId,W,H,nMons,rng){
   const spot=(r,c,gap)=>g[r][c]===' '&&dS[key(r,c)]>=5&&dE[key(r,c)]>=3&&taken.every(([a,b])=>Math.abs(a-r)+Math.abs(b-c)>=gap);
   const put=(r,c,ch)=>{g[r][c]=ch;taken.push([r,c]);};
   const path=[]; {let r=1,c=1; while(dE[key(r,c)]>0){path.push([r,c]);for(const [a,b] of DIRS4){if(g[r+a][c+b]!=='#'&&dE[key(r+a,c+b)]===dE[key(r,c)]-1){r+=a;c+=b;break;}}}}
-  const nMath=Math.max(6,Math.min(40,Math.round(free.length/40)));
-  // scatter rifts across the whole maze, not just along one route:
-  // only ~25% sit on the main path, the rest are spread out over open floor
-  const onPath=Math.round(nMath*.25); let placed=0;
-  for(let i=1;i<=onPath;i++){const base=Math.round(path.length*i/(onPath+1));for(const o of [0,1,-1,2,-2,3,-3,4,-4]){const p=path[base+o]; if(p&&spot(p[0],p[1],4)){put(p[0],p[1],'M');placed++;break;}}}
+  const nMath=Math.max(6,Math.min(40,Math.round(free.length/45)));
+  const onPath=Math.round(nMath*.6); let placed=0;
+  for(let i=1;i<=onPath;i++){const base=Math.round(path.length*i/(onPath+1));for(const o of [0,1,-1,2,-2,3,-3]){const p=path[base+o]; if(p&&spot(p[0],p[1],4)){put(p[0],p[1],'M');placed++;break;}}}
   const cand=shuf(free.slice());
-  for(const [r,c] of cand){if(placed>=nMath)break; if(spot(r,c,4)){put(r,c,'M');placed++;}}
-  const nMys=Math.max(3,Math.round(nMath/3)); let ys=0;
-  const dead=shuf(free.filter(([r,c])=>DIRS4.filter(([a,b])=>g[r+a][c+b]!=='#').length===1&&dS[key(r,c)]>=8));
-  for(const [r,c] of dead){if(ys>=nMys)break; if(spot(r,c,6)){put(r,c,'Y');ys++;}}
-  for(const [r,c] of cand){if(ys>=nMys)break; if(dS[key(r,c)]>=8&&spot(r,c,6)){put(r,c,'Y');ys++;}}
-  // extra scatter across the whole maze so stars aren't clustered
-  for(const [r,c] of shuf(free.slice())){if(ys>=nMys)break; if(spot(r,c,5)){put(r,c,'Y');ys++;}}
+  for(const [r,c] of cand){if(placed>=nMath)break; if(spot(r,c,5)){put(r,c,'M');placed++;}}
+  const nMys=Math.max(2,Math.round(nMath/4)); let ys=0;
+  const dead=shuf(free.filter(([r,c])=>DIRS4.filter(([a,b])=>g[r+a][c+b]!=='#').length===1&&dS[key(r,c)]>=12));
+  for(const [r,c] of dead){if(ys>=nMys)break; if(spot(r,c,8)){put(r,c,'Y');ys++;}}
+  for(const [r,c] of cand){if(ys>=nMys)break; if(dS[key(r,c)]>=12&&spot(r,c,8)){put(r,c,'Y');ys++;}}
   const far=shuf(free.filter(([r,c])=>g[r][c]===' '&&dS[key(r,c)]>=pathLen*.4&&dE[key(r,c)]>=3)), ms=[];
   for(const gap of [10,6,3,1])for(const [r,c] of far){
     if(ms.length>=nMons)break;
@@ -571,6 +632,7 @@ function handleStation(kind,r,c){
     $('qmodal').classList.add('hidden');
     paused=false;
     if(ok){
+      playCorrect();
       correctCount++;
       score += kind==='mystery'? 80 : 30; if(kind==='math')riftsDone++;
       if(kind==='mystery' && hearts<maxHearts){hearts++; toast('Extra heart earned!');}
@@ -582,6 +644,7 @@ function handleStation(kind,r,c){
       toast(kind==='mystery'?'Mystery solved! +80':'Correct! Door opened +'+cfg.bonus+'s');
       updateHUD();
     } else {
+      playWrong();
       wrongCount++;
       noise={r:player.r,c:player.c,until:performance.now()+6000};
       damagePlayer('Wrong answer');
@@ -895,19 +958,29 @@ function setupPlayerCard(){
   drawPortrait(a,64,ch.id,ch.color);
 }
 const DEFAULT_BOARD=[{n:'Stranger',s:2800},{n:'Eleven',s:2430},{n:'Dustin',s:2010},{n:'Lucas',s:1760},{n:'Max',s:1420}];
+const nameKey=n=>String(n||'').trim().toLowerCase();
+function bestPerPlayer(list){
+  const m=new Map();
+  list.forEach(e=>{
+    if(!e||typeof e.s!=='number'||!isFinite(e.s))return;
+    const k=nameKey(e.n), p=m.get(k);
+    if(!p||e.s>p.s)m.set(k,{n:String(e.n),s:e.s});
+  });
+  return [...m.values()].sort((x,y)=>y.s-x.s);
+}
 function loadBoard(){
   const raw=store.get('msd_board');
-  if(raw===null||raw===undefined) return DEFAULT_BOARD.slice();   // nothing saved yet: show the starter scores
-  try{const b=JSON.parse(raw); if(Array.isArray(b)) return b;}catch(e){}
-  return [];                                                       // saved but empty (cleared) stays empty
+  if(raw===null||raw===undefined) return bestPerPlayer(DEFAULT_BOARD);   // nothing saved yet: starter scores
+  try{const b=JSON.parse(raw); if(Array.isArray(b)) return bestPerPlayer(b);}catch(e){}
+  return [];
 }
 let lastScore=null;
 function renderBoard(){
   const l=$('boardList'); l.innerHTML='';
-  const b=loadBoard().slice(0,5);
+  const b=loadBoard().slice(0,5), me=nameKey(getPlayerName());
   if(!b.length){const li=document.createElement('li'); li.className='empty'; li.textContent='No scores yet'; l.appendChild(li); return;}
   b.forEach((e,i)=>{
-    const li=document.createElement('li'); if(e.s===lastScore)li.className='me';
+    const li=document.createElement('li'); if(me&&nameKey(e.n)===me)li.className='me';
     const rk=document.createElement('span'); rk.className='rk'; rk.textContent=i+1;
     const nm=document.createElement('span'); nm.className='nm'; nm.textContent=e.n;
     const sc=document.createElement('span'); sc.className='sc'; sc.textContent=e.s;
@@ -917,6 +990,7 @@ function renderBoard(){
 function getPlayerName(){ return store.get('msd_name') || null; }
 function setPlayerName(n){ store.set('msd_name',n); }
 function openRegister(){
+  if(getPlayerName()){ state='level'; setNav('play'); show('levelScreen'); return; }   // already registered: never ask again
   state='register'; setNav('play');
   regName.value=getPlayerName()||''; regName.classList.remove('bad'); regErr.textContent='';
   show('registerScreen');
@@ -928,7 +1002,8 @@ function goFromIntro(){
 }
 function addScore(sc){
   const name = getPlayerName() || (CHARS.find(x=>x.id===char)||CHARS[0]).name;
-  const b=loadBoard(); b.push({n:name,s:sc}); b.sort((x,y)=>y.s-x.s);
+  // one row per player: a new match only replaces their row if it beats their best
+  const b=bestPerPlayer([...loadBoard(),{n:name,s:sc}]);
   store.set('msd_board',JSON.stringify(b.slice(0,5))); lastScore=sc; renderBoard();
 }
 function validateName(name){
@@ -960,6 +1035,7 @@ document.querySelectorAll('[data-back]').forEach(b=>bindTap(b,()=>{show(infoBack
 // register screen
 const regContinue=$('regContinue'), regBack=$('regBack'), regName=$('regName'), regErr=$('regErr');
 function submitName(){
+  if(getPlayerName()){ state='level'; show('levelScreen'); return; }   // name is locked after first registration
   const err=validateName(regName.value);
   regName.classList.toggle('bad',!!err);
   regErr.textContent=err;
