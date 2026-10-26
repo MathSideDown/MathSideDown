@@ -28,8 +28,16 @@ function tryStartMusic(){
   bgMusic.play().catch(()=>{});
 }
 updateMusicBtn();
-// Browsers block autoplay until a user gesture, so kick it off on first interaction
-document.addEventListener('click', tryStartMusic, {once:true});
+// Browsers block autoplay until a user gesture. Phones suppress 'click' on buttons that use
+// touchstart+preventDefault, so listen to several gesture events and keep retrying until it plays.
+const UNLOCK_EVENTS = ['pointerup','touchend','click','keydown'];
+function unlockMusic(){
+  if(musicMuted) return;
+  bgMusic.play().then(()=>{
+    UNLOCK_EVENTS.forEach(ev=>document.removeEventListener(ev, unlockMusic, true));
+  }).catch(err=>console.warn('[MathSide Down] Music blocked, will retry on next tap:', err));
+}
+UNLOCK_EVENTS.forEach(ev=>document.addEventListener(ev, unlockMusic, true));
 if(musicBtn){
   musicBtn.addEventListener('click', ()=>{
     musicMuted = !musicMuted;
@@ -54,7 +62,7 @@ function makeSfx(src, volume){
       s.addEventListener('ended', finish);
       s.addEventListener('error', finish);
       setTimeout(finish, 2000); // safety net in case 'ended' never fires
-      s.play().catch(finish);
+      s.play().catch(err=>{ console.warn('[MathSide Down] Sound blocked:', src, err); finish(); });
     }catch(e){}
   };
 }
@@ -62,10 +70,16 @@ const playUiClick = makeSfx('assets/sounds/click.ogg', 1.0);
 const playCorrect = makeSfx('assets/sounds/correct.mp3', 1.0);
 const playWrong = makeSfx('assets/sounds/wrong.mp3', 1.0);
 
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('button');
-  if(btn) playUiClick();
-}, true);
+let lastClickSfx = 0;
+function sfxButtonClick(e){
+  if(!e.target.closest || !e.target.closest('button')) return;
+  const now = performance.now();
+  if(now - lastClickSfx < 150) return; // pointerup + click would otherwise double-fire
+  lastClickSfx = now;
+  playUiClick();
+}
+document.addEventListener('pointerup', sfxButtonClick, true);
+document.addEventListener('click', sfxButtonClick, true);
 
 // ---------- Data ----------
 const LEVELS = [
