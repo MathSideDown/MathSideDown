@@ -18,9 +18,11 @@ function applyMusicVolume(){
 function duckMusicStart(){ duckCount++; applyMusicVolume(); }
 function duckMusicEnd(){ duckCount = Math.max(0, duckCount-1); applyMusicVolume(); }
 const musicBtn = document.getElementById('musicToggle');
+const MUSIC_ICON = '<svg class="pxic" viewBox="0 0 8 8" aria-hidden="true"><rect x="6" y="0" width="1" height="1"/><rect x="7" y="0" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="7" width="1" height="1"/></svg>';
+const SKULL_ICON = '<svg class="pxic" viewBox="0 0 8 8" aria-hidden="true"><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="7" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/></svg>';
 function updateMusicBtn(){
   if(!musicBtn)return;
-  musicBtn.textContent = musicMuted ? '♪ Off' : '♪ Music';
+  musicBtn.innerHTML = MUSIC_ICON + (musicMuted ? 'Off' : 'Music');
   musicBtn.classList.toggle('music-off', musicMuted);
 }
 function tryStartMusic(){
@@ -112,10 +114,10 @@ const THEMES={
 };
 MAPS.forEach(m=>Object.assign(m.theme,THEMES[m.id]));
 const DIFF = {
-  preschool :{w:35,h:21,hearts:4,mons:1,stepMs:1250,iq:1,speed:1,sight:5,  acc:.65,grace:6000,stun:5000,stepSec:.85,qSec:7,  bonus:6,label:'Nursery'},
-  elementary:{w:45,h:27,hearts:3,mons:2,stepMs:900, iq:2,speed:2,sight:9,  acc:.85,grace:4500,stun:4000,stepSec:.65,qSec:6,  bonus:5,label:'Elementary'},
-  highschool:{w:57,h:33,hearts:3,mons:3,stepMs:580, iq:3,speed:3,sight:16, acc:.95,grace:3500,stun:3000,stepSec:.55,qSec:5,  bonus:4,label:'High School'},
-  college   :{w:71,h:41,hearts:3,mons:4,stepMs:460, iq:4,speed:4,sight:999,acc:1,  grace:2500,stun:2000,stepSec:.45,qSec:4.5,bonus:3,label:'College'}
+  preschool :{w:35,h:21,hearts:5,mons:1,stepMs:1250,iq:1,speed:1,sight:5,  acc:.65,grace:6000,stun:5000,stepSec:.85,qSec:7,  bonus:6,label:'Nursery'},
+  elementary:{w:45,h:27,hearts:5,mons:2,stepMs:900, iq:2,speed:2,sight:9,  acc:.85,grace:4500,stun:4000,stepSec:.65,qSec:6,  bonus:5,label:'Elementary'},
+  highschool:{w:57,h:33,hearts:5,mons:3,stepMs:580, iq:3,speed:3,sight:16, acc:.95,grace:3500,stun:3000,stepSec:.55,qSec:5,  bonus:4,label:'High School'},
+  college   :{w:71,h:41,hearts:5,mons:4,stepMs:460, iq:4,speed:4,sight:999,acc:1,  grace:2500,stun:2000,stepSec:.45,qSec:4.5,bonus:3,label:'College'}
 };
 const DIRS4=[[-1,0],[1,0],[0,-1],[0,1]];
 const STYLE = {
@@ -201,7 +203,7 @@ let level = null, map = null, char = null;
 let maze = null, rows=0, cols=0;
 let player = {r:0,c:0};
 let monsters = [];
-let hearts = 3, maxHearts=5;
+let hearts = 5, maxHearts=5;
 let score = 0;
 let timeLeft = 120;
 let timerInt = null;
@@ -604,7 +606,13 @@ function tickMonsters(){
   });
   const dormant=monsters.length&&monsters.every(m=>now<m.freezeUntil);
   const label=dormant?'Dormant':worst==='chase'?'HUNTING YOU!':worst==='hunt'?'Searching…':'Wandering';
-  const el=$('threatMode'); if(el.textContent!==label){el.textContent=label;el.style.color=worst==='chase'&&!dormant?'#ff2a3d':'';}
+  const hunting=worst==='chase'&&!dormant;
+  const el=$('threatMode');
+  if(el.dataset.label!==label){
+    el.dataset.label=label;
+    el.innerHTML=(hunting?SKULL_ICON:'')+label;
+    el.style.color=hunting?'#ff2a3d':'';
+  }
 }
 
 function damagePlayer(reason){
@@ -710,7 +718,7 @@ function bmp(g,rows,pal,x,y,flip){
 }
 function txt(g,str,x,y,c){g.fillStyle=c;[...str].forEach((ch,n)=>FONT[ch].forEach((row,j)=>{for(let i=0;i<3;i++)if(row[i]==='1')g.fillRect(x+n*4+i,y+j,1,1);}));}
 function humPal(id,color){const p=SPR[id]||SPR.eleven;return{o:'#0a0610',h:p.hair,s:p.skin,e:'#0a0610',c:color,p:'#2a2a48'};}
-function drawSprite(g,x,y,s,id,color){ g.fillStyle='rgba(0,0,0,.4)';g.fillRect(x+3,y+14,10,2); bmp(g,HUM,humPal(id,color),x+2,y+1); }
+function drawSprite(g,x,y,s,id,color,bob){ bob=bob||0; g.fillStyle='rgba(0,0,0,.4)';g.fillRect(x+3,y+14,10,2); bmp(g,HUM,humPal(id,color),x+2,y+1-bob); }
 function drawPortrait(g,S,id,color){ g.clearRect(0,0,16,16); g.fillStyle='#2a0f16'; g.fillRect(0,0,16,16); bmp(g,HUM.slice(0,10),humPal(id,color),2,5); }
 const hsh=(a,b)=>((a*73856093)^(b*19349663))>>>0;
 const PREVIEW=genMaze('hawkins',31,17,0,mulberry32(1986)).rows.map(r=>r.replace(/[SG]/g,' ').split(''));
@@ -724,6 +732,9 @@ function npcsFor(mz){
 }
 function wallTile(g,x,y,th,h,above,below){
   g.fillStyle=th.wall;g.fillRect(x,y,T,T);
+  const tint=h%7;
+  if(tint===0){g.fillStyle='rgba(255,120,110,.06)';g.fillRect(x,y,T,T);}
+  else if(tint===1){g.fillStyle='rgba(80,40,60,.1)';g.fillRect(x,y,T,T);}
   g.fillStyle='rgba(255,255,255,.07)';g.fillRect(x+1,y+1,T-2,6);
   if(!above){g.fillStyle='rgba(255,255,255,.28)';g.fillRect(x,y,T,2);}
   if(!below){g.fillStyle='rgba(0,0,0,.5)';g.fillRect(x,y+12,T,4);}
@@ -742,6 +753,9 @@ function vinePx(g,x,y,h){
 }
 function floorTile(g,x,y,th,h){
   g.fillStyle=th.floor;g.fillRect(x,y,T,T);
+  const tint=h%9;
+  if(tint===0){g.fillStyle='rgba(255,80,90,.05)';g.fillRect(x,y,T,T);}
+  else if(tint===1){g.fillStyle='rgba(0,0,0,.08)';g.fillRect(x,y,T,T);}
   g.fillStyle='rgba(255,225,200,.05)';g.fillRect(x+1,y+1,7,7);g.fillRect(x+9,y+9,6,6);
   g.fillStyle='rgba(0,0,0,.5)';g.fillRect(x+15,y,1,T);g.fillRect(x,y+15,T,1);
   g.fillStyle='rgba(255,220,200,.12)';g.fillRect(x+2+h%11,y+2+(h>>4)%11,1,1);g.fillRect(x+3+(h>>7)%10,y+4+(h>>10)%10,1,1);
@@ -777,8 +791,8 @@ function buildStatic(mz,R,C,th){
     if(mz[rr][c]==='#') wallTile(sg,x,y,th,h,at(rr-1,c)==='#',at(rr+1,c)==='#');
     else{ floorTile(sg,x,y,th,h); if(mz[rr][c]===' '&&h%13===0&&!(rr===1&&c<5))propPx(sg,h%3,x,y); }
   }
-  for(let rr=0;rr<R;rr++)for(let c=0;c<C;c++){ if(mz[rr][c]==='#'){const h=hsh(rr+3,c+5); if(h%3===0)vinePx(sg,c*T,rr*T,h);} }
-  if(at(1,3)!=='#'){const lx=3*T+8,ly=T+8;glowSq(sg,lx,ly,28,'255,190,110',.1);sg.fillStyle='#2a2430';sg.fillRect(lx-1,ly-2,2,10);sg.fillStyle='#ffd48a';sg.fillRect(lx-3,ly-5,6,3);}
+  for(let rr=0;rr<R;rr++)for(let c=0;c<C;c++){ if(mz[rr][c]==='#'){const h=hsh(rr+3,c+5); if(h%2===0)vinePx(sg,c*T,rr*T,h);} }
+  if(at(1,3)!=='#'){const lx=3*T+8,ly=T+8;glowSq(sg,lx,ly,40,'255,160,90',.06);glowSq(sg,lx,ly,28,'255,190,110',.12);glowSq(sg,lx,ly,14,'255,220,160',.18);sg.fillStyle='#2a2430';sg.fillRect(lx-1,ly-2,2,10);sg.fillStyle='#ffd48a';sg.fillRect(lx-3,ly-5,6,3);sg.fillStyle='#fff2d0';sg.fillRect(lx-1,ly-4,2,1);}
 }
 const MON_PALS=[
   {p:'#9a5aa8',d:'#3a1a48',m:'#ffd0ff'},
@@ -819,20 +833,21 @@ function render(){
     else if(tile==='Y'){glowSq(bg,x+8,y+8,14,'255,176,46',.1);bmp(bg,STAR,{'#':fr%2?'#ffb02e':'#ffe08a'},x+4,y+5);}
     else if(tile==='E'){glowSq(bg,x+8,y+10,24,'57,255,20',.08);exitPx(bg,x,y);}
   }
-  const me=playing?char:null;
-  npcsFor(mz).forEach(n=>{ if(n.id!==me) drawSprite(bg,n.c*T,n.r*T,T,n.id,n.col); });
+  const me=playing?char:null, idleBob=fr%4===0?1:0;
+  npcsFor(mz).forEach(n=>{ if(n.id!==me) drawSprite(bg,n.c*T,n.r*T,T,n.id,n.col,idleBob); });
   if(playing){
     const cfg=DIFF[level]||DIFF.elementary, pal=MON_PALS[cfg.iq-1], now=performance.now();
     monsters.forEach(m=>{
       const mx=Math.round(m.vc*T), my=Math.round(m.vr*T);
-      if(cfg.iq>=4)glowSq(bg,mx+8,my+8,16,'255,30,50',.12);
+      const hunting=m.mode==='chase'&&now>=m.freezeUntil;
+      glowSq(bg,mx+8,my+8,12+cfg.iq*2+(hunting?6:0),'255,30,50',.07+cfg.iq*.018+(hunting?.06:0));
       bg.globalAlpha=now<m.freezeUntil?.45:1;
       bmp(bg,MON,pal,mx+2,my+1+(fr%2));
       bg.globalAlpha=1;
-      if(m.mode==='chase'&&now>=m.freezeUntil)txt(bg,'!',mx+6,my-5,'#ffdd55');
+      if(hunting)txt(bg,'!',mx+6,my-5,'#ffdd55');
     });
     const ch=CHARS.find(x=>x.id===char);
-    if(!(performance.now()<invulnUntil&&fr%2))drawSprite(bg,Math.round(pv.c*T),Math.round(pv.r*T),T,ch.id,ch.color);
+    if(!(performance.now()<invulnUntil&&fr%2))drawSprite(bg,Math.round(pv.c*T),Math.round(pv.r*T),T,ch.id,ch.color,idleBob);
   }
   g.imageSmoothingEnabled=false;
   g.drawImage(buf,Math.round(view.cx*T),Math.round(view.cy*T),vc*T,vr*T,offX,offY,vc*ts,vr*ts);
