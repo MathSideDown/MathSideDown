@@ -311,3 +311,171 @@ svg{shape-rendering:crispEdges;}
 .qcard{max-width:100%;}
 .board li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media (max-width:900px){.qcard{max-height:92vh;overflow-y:auto;}.qtext{font-size:46px;}.qtext.md{font-size:36px;}.qtext.lg{font-size:28px;}.qtext.xl{font-size:22px;}}
+
+
+/* =====================================================================
+   MOBILE OVERHAUL (v mobile1)
+   - global: dynamic viewport height, safe areas, no rubber-banding
+   - overlays scroll from the top (flex centering used to clip the title)
+   - portrait: compact header w/ 48px nav, stats strip, 48px d-pad, Board button
+   - landscape phones: slim header, stats column, maze uses full height,
+     floating d-pad + pause over the maze (only while playing)
+   ===================================================================== */
+html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%;}
+@supports (height:100dvh){html,body{height:100dvh;}}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input{-webkit-user-select:text;user-select:text;}
+.key,.btn,.nav button,.card,.qopt{-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+/* Flex-centered scroll containers cannot scroll to their top edge. Auto margins center when there is room and collapse when there is not. */
+.overlay{justify-content:flex-start;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.overlay>:first-child{margin-top:auto;}
+.overlay>:last-child{margin-bottom:auto;}
+.nav button.navBoard{display:none;}
+.nav .nl{display:inline;}
+.mboard{list-style:none;width:100%;max-width:360px;margin:6px 0;}
+.mboard li{display:flex;gap:14px;padding:8px 6px;border-bottom:4px solid #1e0a10;font-size:24px;line-height:1;text-align:left;}
+.mboard li .rk{width:14px;color:var(--amber);}
+.mboard li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ecd9de;}
+.mboard li .sc{color:var(--red);}
+.mboard li.me{background:#3a1218;}
+.mboard li.empty{color:var(--muted);font-size:20px;justify-content:center;text-align:center;padding:14px 4px;}
+.board-actions{display:flex;gap:10px;justify-content:center;margin-top:10px;}
+
+/* ---------- Phones + small tablets (any orientation) ---------- */
+@media (max-width:900px), (orientation:landscape) and (max-height:520px){
+  /* the idle placeholder used to leak out under the controls (a later, more specific rule re-showed it) */
+  .side .rift-idle{display:none!important;}
+  .nav button.navBoard{display:flex;}
+  .nav button{min-height:40px;}
+  .key{min-width:44px;min-height:44px;}
+  .btn{min-height:44px;}
+  .qopt{min-height:48px;}
+}
+
+/* ---------- Portrait phones ---------- */
+@media (max-width:900px) and (orientation:portrait), (max-width:900px) and (min-height:521px){
+  .masthead{flex-wrap:wrap;justify-content:center;align-content:center;padding:6px 8px 8px;gap:6px;}
+  .logo{width:100%;flex-direction:row;justify-content:center;align-items:baseline;gap:8px;margin:0;}
+  .logo-main{font-size:18px;letter-spacing:0;line-height:1.1;}
+  .logo-sub{font-size:6px;margin:0;}
+  .nav{width:100%;flex:0 0 auto;justify-content:stretch;gap:4px;}
+  .nav button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    min-height:48px;padding:5px 2px;font-size:7px;line-height:1.25;letter-spacing:0;border-width:3px;box-shadow:0 3px 0 #000;text-align:center;}
+  .nav button .pxic{margin:0;width:16px;height:16px;}
+  /* stats: row 1 = who / lives / score / time, row 2 = Demogorgon mode + rifts progress */
+  .stats{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:4px 8px;padding:6px 8px;}
+  .who{min-width:0;font-size:20px;gap:6px;}
+  .who canvas{width:36px;height:36px;flex:0 0 auto;}
+  #pName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stat{gap:4px;}
+  .stat .v{font-size:20px;line-height:1;}
+  .stic{width:14px;height:14px;}
+  .hearts{letter-spacing:0;font-size:18px!important;}
+  .stats .threat,.stats .mission{display:flex;align-items:center;gap:6px;min-width:0;border-top:0;padding-top:0;margin:0;}
+  .stats .threat{grid-column:1 / span 2;}
+  .stats .mission{grid-column:3 / span 2;}
+  .stats .threat .ph{display:block;margin:0;padding:0;border:0;font-size:6px;white-space:nowrap;}
+  .stats .threat .trow,.stats .mission .ph,.stats .mission p{display:none;}
+  .threat .tmode{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mission .prog-l{display:flex;gap:4px;margin:0;font-size:17px;white-space:nowrap;}
+  .mission .prog-l span:first-child{display:none;}
+  .mission .prog-l::before{content:'Rifts';font-family:var(--px);font-size:6px;color:var(--amber);align-self:center;}
+  .mission .bar{flex:1 1 auto;min-width:24px;height:10px;border-width:3px;}
+  .controls{z-index:1;padding:4px 8px 8px;}
+  .ctl{padding:6px 4px;}
+  .grp{padding:0 14px;gap:10px;}
+  .keys{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px;}
+  .key{font-size:11px;}
+  .key.pause{width:56px;height:56px;}
+  .key.pause i{height:20px;}
+}
+@media (max-width:360px) and (orientation:portrait){
+  .logo-main{font-size:15px;}
+  .nav button{font-size:6px;}
+  .who{font-size:17px;}
+}
+
+/* ---------- Landscape phones: maze gets the whole screen ---------- */
+@media (orientation:landscape) and (max-height:520px){
+  body::before,body::after,.veinExtra,.stage::before,.stage::after,.panel::before,.panel::after{display:none;}
+  .masthead{flex-wrap:nowrap;height:48px;padding:0 10px;gap:8px;justify-content:space-between;border-bottom-width:3px;box-shadow:0 3px 0 #000;}
+  .logo{flex-direction:row;align-items:baseline;gap:6px;margin:0;}
+  .logo-main{font-size:13px;letter-spacing:0;text-shadow:1px 1px 0 #5a0010,2px 2px 0 #000;}
+  .logo-sub,.quote,.skyline{display:none;}
+  .nav{flex:0 1 auto;width:auto;gap:4px;}
+  .nav button{flex:0 0 auto;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;
+    height:40px;min-height:40px;padding:0 9px;font-size:7px;letter-spacing:0;border-width:3px;box-shadow:0 3px 0 #000;}
+  .nav button .pxic{margin:0;width:14px;height:14px;}
+  .layout{grid-template-columns:172px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:8px;padding:8px 8px 8px 8px;}
+  .stats{display:grid;grid-template-columns:1fr 1fr;align-content:start;align-items:center;gap:6px 6px;padding:8px;box-shadow:inset 0 0 0 3px #2a0610,4px 4px 0 #000;border-width:3px;}
+  .who{grid-column:1 / span 2;font-size:20px;gap:8px;min-width:0;}
+  .who canvas{width:34px;height:34px;flex:0 0 auto;border-width:3px;}
+  #pName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stat{gap:4px;min-width:0;}
+  .stat:nth-of-type(1){grid-column:1 / span 2;}
+  .stat .v{font-size:20px;line-height:1;}
+  .stic{width:14px;height:14px;}
+  .hearts{letter-spacing:0;font-size:18px!important;}
+  .stats .mission{display:block;grid-column:1 / span 2;border-top:0;padding-top:2px;margin:0;}
+  .stats .mission .ph,.stats .mission p{display:none;}
+  .mission .prog-l{display:flex;gap:4px;margin:0 0 3px;font-size:17px;white-space:nowrap;}
+  .mission .prog-l span:first-child{display:none;}
+  .mission .prog-l::before{content:'Rifts';font-family:var(--px);font-size:7px;color:var(--amber);align-self:center;}
+  .mission .bar{height:10px;border-width:3px;}
+  .stage{border-width:3px;box-shadow:inset 0 0 0 3px #2a0610,4px 4px 0 #000;}
+  /* floating controls: only while actually playing, never over a menu or a question */
+  .controls{position:fixed;left:0;right:0;bottom:0;height:0;padding:0;z-index:5;display:block;pointer-events:none;visibility:hidden;}
+  body.playing:not(.ovl):not(.qopen) .controls{visibility:visible;}
+  .ctl{position:static;display:block;padding:0;border:0;background:none;box-shadow:none;}
+  .ctl::before,.ctl::after,.note,.controls .lab{display:none;}
+  .grp,.grp + .grp{position:fixed;padding:0;border:0;pointer-events:auto;}
+  .grp:first-child{left:calc(env(safe-area-inset-left) + 20px);bottom:calc(env(safe-area-inset-bottom) + 26px);}
+  .grp:nth-child(3){right:calc(env(safe-area-inset-right) + 18px);bottom:calc(env(safe-area-inset-bottom) + 22px);}
+  .grp.arrows,.cl,.plabel{display:none;}
+  .keys{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:6px;}
+  .key{font-size:11px;}
+  .key.pause{width:52px;height:52px;opacity:.85;}
+  .key.pause i{height:20px;}
+  /* menus: compact so they fit a ~300px tall stage, and scroll if they do not */
+  .overlay{padding:8px 12px;}
+  .overlay h1{font-size:14px;margin-bottom:4px;text-shadow:2px 2px 0 #5a0010,3px 3px 0 #000;}
+  .overlay h2{font-size:20px;margin-bottom:2px;}
+  .overlay p{font-size:17px;margin-bottom:6px;max-width:640px;line-height:1.05;}
+  #qrImg,.qr-note{display:none;}
+  .grid{max-width:none;gap:8px;padding:0 4px;grid-template-columns:repeat(auto-fit,minmax(96px,1fr))!important;}
+  .card{padding:8px 6px;}
+  .card .desc{font-size:16px;}
+  .btn{padding:10px 16px;font-size:10px;}
+  .reg-field{margin:2px 0 8px;}
+  .reg-err{min-height:16px;margin-top:4px;}
+  #boardScreen p{display:none;}
+  .mboard li{padding:4px 6px;font-size:20px;border-bottom-width:3px;}
+  .res-list{margin:4px 0;}
+  .overlay .big{font-size:28px;margin:2px 0;}
+  .about h1{margin-bottom:8px;}
+  /* question card */
+  .qcard{width:min(680px,94%);padding:10px 14px;max-height:calc(100vh - 16px);}
+  .qtype{font-size:18px;}
+  .qtext{font-size:34px;margin:6px 0 8px;}
+  .qtext.md{font-size:28px;}.qtext.lg{font-size:24px;}.qtext.xl{font-size:19px;}
+  .qopts{gap:8px;}
+  .qopt{height:46px;min-height:46px;font-size:26px;}
+  .qopt.tx{font-size:22px;}.qopt.tx2{font-size:19px;height:auto;}
+  .qmeta{display:none;}
+  .qhint-btn{margin-top:8px;min-height:40px;}
+  .qhint{margin-top:8px;font-size:19px;}
+}
+/* very narrow landscape (small phones): icons only in the nav */
+@media (orientation:landscape) and (max-height:520px) and (max-width:700px){
+  .nav button .nl{display:none;}
+  .nav button{width:44px;padding:0;}
+  .logo-main{font-size:11px;}
+  .layout{grid-template-columns:164px minmax(0,1fr);}
+}
+@media (orientation:landscape) and (max-height:330px){
+  .stats .mission{display:none;}
+}
+#boardScreen p{display:none;}
+.mboard li{padding:6px 6px;font-size:22px;}
+@media (orientation:landscape) and (max-height:520px){.mboard li{padding:3px 6px;font-size:19px;}.board-actions{margin-top:6px;}}

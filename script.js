@@ -22,7 +22,7 @@ const MUSIC_ICON = '<svg class="pxic" viewBox="0 0 8 8" aria-hidden="true"><rect
 const SKULL_ICON = '<svg class="pxic" viewBox="0 0 8 8" aria-hidden="true"><rect x="1" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="5" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="0" y="1" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="2" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="7" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="1" y="2" width="1" height="1"/><rect x="3" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="7" y="2" width="1" height="1"/><rect x="0" y="3" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="4" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="1" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="3" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="3" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="2" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/></svg>';
 function updateMusicBtn(){
   if(!musicBtn)return;
-  musicBtn.innerHTML = MUSIC_ICON + (musicMuted ? 'Off' : 'Music');
+  musicBtn.innerHTML = MUSIC_ICON + '<span class="nl">' + (musicMuted ? 'Off' : 'Music') + '</span>';
   musicBtn.classList.toggle('music-off', musicMuted);
 }
 function tryStartMusic(){
@@ -41,7 +41,7 @@ function unlockMusic(){
 }
 UNLOCK_EVENTS.forEach(ev=>document.addEventListener(ev, unlockMusic, true));
 if(musicBtn){
-  musicBtn.addEventListener('click', ()=>{
+  bindTap(musicBtn, ()=>{
     musicMuted = !musicMuted;
     localStorage.setItem('msd_music_muted', musicMuted ? '1' : '0');
     if(musicMuted) bgMusic.pause(); else { bgMusic.play().catch(()=>{}); applyMusicVolume(); }
@@ -222,8 +222,18 @@ let highScore = +store.get('msd_best')||0;
 
 // ---------- DOM helpers ----------
 const $ = id => document.getElementById(id);
-function show(id){document.querySelectorAll('.overlay,.qmodal').forEach(e=>{if(e.id===id)e.classList.remove('hidden');else if(e.classList.contains('overlay')||e.classList.contains('qmodal'))e.classList.add('hidden');});}
-function hideAll(){document.querySelectorAll('.overlay,.qmodal').forEach(e=>e.classList.add('hidden'));}
+function show(id){document.querySelectorAll('.overlay,.qmodal').forEach(e=>{if(e.id===id)e.classList.remove('hidden');else if(e.classList.contains('overlay')||e.classList.contains('qmodal'))e.classList.add('hidden');});syncUI();}
+function hideAll(){document.querySelectorAll('.overlay,.qmodal').forEach(e=>e.classList.add('hidden'));syncUI();}
+// Mirrors game/menu/question state onto <body> so CSS can show the floating touch pad only when it is usable.
+let _uiSig='';
+function syncUI(){
+  const b=document.body; if(!b)return;
+  const ovl=!!document.querySelector('.stage .overlay:not(.hidden)');
+  const sig=(typeof state!=='undefined'?state:'')+'|'+(ovl?1:0)+'|'+(qOpen?1:0);
+  if(sig===_uiSig)return; _uiSig=sig;
+  b.classList.toggle('playing',typeof state!=='undefined'&&(state==='play'||state==='paused'));
+  b.classList.toggle('ovl',ovl); b.classList.toggle('qopen',!!qOpen);
+}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1600);}
 function floatText(txt,color,x,y){const f=document.createElement('div');f.className='float';f.textContent=txt;f.style.color=color;f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);}
 
@@ -238,6 +248,8 @@ function resize(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 window.addEventListener('resize',resize);
+window.addEventListener('orientationchange',()=>{ setTimeout(resize,250); });
+if('ResizeObserver' in window){ try{ new ResizeObserver(()=>resize()).observe(canvas.parentElement); }catch(e){} }
 
 // ---------- Screens ----------
 function pipsHTML(n){return '<span class="pips">'+[1,2,3,4].map(i=>'<i class="'+(i<=n?'on':'')+'"></i>').join('')+'</span>';}
@@ -800,9 +812,11 @@ const MON_PALS=[
   {p:'#b3001b',d:'#1a0308',m:'#ffb02e'},
   {p:'#ff2a3d',d:'#10010a',m:'#ffffff'}
 ];
+let _uiTick=0;
 function render(){
   const r=canvas.getBoundingClientRect(), g=ctx;
   if(!r.width||!r.height){requestAnimationFrame(render);return;}
+  if((++_uiTick%8)===0)syncUI();
   g.fillStyle='#05030a'; g.fillRect(0,0,r.width,r.height);
   const playing=(state==='play'||state==='paused')&&maze;
   const mz=playing?maze:PREVIEW, R=mz.length, C=mz[0].length;
@@ -886,9 +900,14 @@ function handleDir(d){
   if(d==='right')movePlayer(0,1);
 }
 function bindTap(el, fn){
-  const fire=(e)=>{ if(e){e.preventDefault();} try{fn();}catch(err){console.error(err);} };
-  el.addEventListener('click', fire);
-  el.addEventListener('touchstart', fire, {passive:false});
+  // Fires on touchend only if the finger did not travel (so scrolling a menu never taps a card); click covers mouse/keyboard.
+  let sx=0, sy=0, moved=false, down=false;
+  const fire=()=>{ try{fn();}catch(err){console.error(err);} };
+  el.addEventListener('touchstart',e=>{ const t=e.touches[0]; sx=t.clientX; sy=t.clientY; moved=false; down=true; },{passive:true});
+  el.addEventListener('touchmove',e=>{ const t=e.touches[0]; if(Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10) moved=true; },{passive:true});
+  el.addEventListener('touchcancel',()=>{ down=false; },{passive:true});
+  el.addEventListener('touchend',e=>{ if(!down)return; down=false; if(!moved){ e.preventDefault(); fire(); } },{passive:false});
+  el.addEventListener('click',e=>{ e.preventDefault(); fire(); });
 }
 function bindDir(btn, dir){
   const fire=(e)=>{ if(e){e.preventDefault();} try{handleDir(dir);}catch(err){} };
@@ -1005,15 +1024,17 @@ function loadBoard(){
 }
 let lastScore=null;
 function renderBoard(){
-  const l=$('boardList'); l.innerHTML='';
   const b=loadBoard().slice(0,5), me=nameKey(getPlayerName());
-  if(!b.length){const li=document.createElement('li'); li.className='empty'; li.textContent='No scores yet'; l.appendChild(li); return;}
-  b.forEach((e,i)=>{
-    const li=document.createElement('li'); if(me&&nameKey(e.n)===me)li.className='me';
-    const rk=document.createElement('span'); rk.className='rk'; rk.textContent=i+1;
-    const nm=document.createElement('span'); nm.className='nm'; nm.textContent=e.n;
-    const sc=document.createElement('span'); sc.className='sc'; sc.textContent=e.s;
-    li.append(rk,nm,sc); l.appendChild(li);
+  ['boardList','boardListM'].forEach(id=>{
+    const l=$(id); if(!l)return; l.innerHTML='';
+    if(!b.length){const li=document.createElement('li'); li.className='empty'; li.textContent='No scores yet'; l.appendChild(li); return;}
+    b.forEach((e,i)=>{
+      const li=document.createElement('li'); if(me&&nameKey(e.n)===me)li.className='me';
+      const rk=document.createElement('span'); rk.className='rk'; rk.textContent=i+1;
+      const nm=document.createElement('span'); nm.className='nm'; nm.textContent=e.n;
+      const sc=document.createElement('span'); sc.className='sc'; sc.textContent=e.s;
+      li.append(rk,nm,sc); l.appendChild(li);
+    });
   });
 }
 function getPlayerName(){ return store.get('msd_name') || null; }
@@ -1046,10 +1067,10 @@ function setNav(n){document.querySelectorAll('.nav button').forEach(b=>b.classLi
 function openInfo(id){
   if(state==='play') paused=true;
   const vis=[...document.querySelectorAll('.stage .overlay')].find(o=>!o.classList.contains('hidden'));
-  if(!vis) infoBack='pauseScreen'; else if(vis.id!=='howScreen'&&vis.id!=='aboutScreen') infoBack=vis.id;
+  if(!vis) infoBack='pauseScreen'; else if(vis.id!=='howScreen'&&vis.id!=='aboutScreen'&&vis.id!=='boardScreen') infoBack=vis.id;
   show(id);
 }
-document.querySelectorAll('.nav button').forEach(b=>bindTap(b,()=>{
+document.querySelectorAll('.nav button[data-nav]').forEach(b=>bindTap(b,()=>{
   if(qOpen)return;
   const n=b.dataset.nav; setNav(n);
   if(n==='home') quitToMenu();
@@ -1058,7 +1079,7 @@ document.querySelectorAll('.nav button').forEach(b=>bindTap(b,()=>{
     else if(!getPlayerName()) openRegister();
     else {state='level';show('levelScreen');}
   }
-  else openInfo(n==='how'?'howScreen':'aboutScreen');
+  else openInfo(n==='how'?'howScreen':n==='board'?'boardScreen':'aboutScreen');
 }));
 document.querySelectorAll('[data-back]').forEach(b=>bindTap(b,()=>{show(infoBack);setNav(state==='play'?'play':'home');}));
 // register screen
@@ -1079,6 +1100,7 @@ regName.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();s
 regName.addEventListener('input',()=>{ regErr.textContent=''; regName.classList.remove('bad'); });
 // leaderboard clear
 bindTap($('boardClear'), clearBoard);
+bindTap($('boardClearM'), clearBoard);
 [['upBtn2','up'],['downBtn2','down'],['leftBtn2','left'],['rightBtn2','right']].forEach(([id,d])=>bindDir($(id),d));
 
 drawArt(); drawSky(); renderBoard(); setThreatHUD(null); riftsTotal=PREVIEW.flat().filter(t=>t==='M').length; setupPlayerCard(); updateHUD();
@@ -1093,4 +1115,5 @@ document.addEventListener('touchstart', (e)=>{ if(state==='intro' && e.target.cl
 resize();
 show('introScreen');
 state='intro';
+syncUI();
 checkOrientation();
